@@ -7,16 +7,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-/* ------- Palette (unchanged-ish) ------- */
+/* ------- Orange + warm charcoal palette ------- */
 const palette = {
-  bgFrom: "from-amber-900",
-  bgVia: "via-neutral-950",
-  bgTo: "to-orange-950",
-  textMain: "text-amber-100",
-  dot: "bg-amber-400",
-  frameGold: "border-amber-300",
-  frameEmerald: "border-emerald-400",
-  frameSmoke: "border-stone-200",
+  bgFrom: "from-[#1b1b1b]",
+  bgVia: "via-[#221c19]",
+  bgTo: "to-[#2d1f15]",
+  textMain: "text-orange-100",
+  dot: "bg-orange-400",
+  framePrimary: "border-orange-400",
+  frameSecondary: "border-orange-300",
+  frameSmoke: "border-stone-300/80",
 };
 
 export default function SonarBanglaLoader() {
@@ -48,9 +48,9 @@ export default function SonarBanglaLoader() {
       )}
       aria-label="Hero"
     >
-      {/* lightweight radial vignettes (no blur filters) */}
+      {/* Lightweight radial vignettes (no blur filters) */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 [background:radial-gradient(60%_60%_at_50%_40%,rgba(255,160,64,.14),transparent_55%)]" />
+        <div className="absolute inset-0 [background:radial-gradient(60%_60%_at_50%_40%,rgba(255,140,0,.14),transparent_55%)]" />
         <div className="absolute inset-0 [background:radial-gradient(100%_100%_at_50%_50%,transparent_65%,rgba(0,0,0,.5)_100%)]" />
       </div>
 
@@ -69,14 +69,14 @@ export default function SonarBanglaLoader() {
         <Link
           href="/home"
           onClick={handleExplore}
-          className="relative px-14 py-5 rounded-full font-extrabold text-2xl bg-amber-400 text-black shadow-lg hover:bg-amber-300 transition focus:outline-none focus:ring-4 focus:ring-amber-300"
+          className="relative px-14 py-5 rounded-full font-extrabold text-2xl bg-orange-500 text-black shadow-lg hover:bg-orange-400 transition focus:outline-none focus:ring-4 focus:ring-orange-300"
         >
           <span className={prefersReduced ? "" : "pulse-ring"} />
           <span>Explore</span>
         </Link>
       </div>
 
-      {/* Subtle smoke (static SVG masks instead of big blurs) */}
+      {/* Subtle smoke (static SVG path instead of big blurs) */}
       {!prefersReduced && <LightweightSmoke />}
 
       <Cards />
@@ -188,7 +188,7 @@ const Cards = React.memo(function Cards() {
         rotate="4deg"
         top="14%"
         left="16%"
-        frame="gold"
+        frame="primary"
         className="w-64 md:w-[28rem]"
         isMobile={isMobile}
         bumpZ={bumpZ}
@@ -200,7 +200,7 @@ const Cards = React.memo(function Cards() {
         rotate="12deg"
         top="44%"
         left="60%"
-        frame="emerald"
+        frame="secondary"
         className="w-56 md:w-[24rem]"
         isMobile={isMobile}
         bumpZ={bumpZ}
@@ -224,7 +224,7 @@ const Cards = React.memo(function Cards() {
         rotate="6deg"
         top="58%"
         left="30%"
-        frame="gold"
+        frame="primary"
         className="w-72 md:w-[30rem]"
         isMobile={isMobile}
         bumpZ={bumpZ}
@@ -236,7 +236,7 @@ const Cards = React.memo(function Cards() {
         rotate="16deg"
         top="18%"
         left="68%"
-        frame="emerald"
+        frame="secondary"
         className="w-60 md:w-[26rem]"
         isMobile={isMobile}
         bumpZ={bumpZ}
@@ -260,7 +260,7 @@ const Cards = React.memo(function Cards() {
         rotate="-10deg"
         top="64%"
         left="14%"
-        frame="emerald"
+        frame="secondary"
         className="w-56 md:w-[24rem]"
         isMobile={isMobile}
         bumpZ={bumpZ}
@@ -272,7 +272,7 @@ const Cards = React.memo(function Cards() {
         rotate="14deg"
         top="66%"
         left="72%"
-        frame="gold"
+        frame="primary"
         className="w-48 md:w-[22rem]"
         isMobile={isMobile}
         bumpZ={bumpZ}
@@ -282,7 +282,7 @@ const Cards = React.memo(function Cards() {
 });
 
 type AnyDivRef = React.RefObject<HTMLDivElement | null>;
-type FrameTone = "gold" | "emerald" | "smoke";
+type FrameTone = "primary" | "secondary" | "smoke";
 
 type CardProps = {
   containerRef: AnyDivRef;
@@ -312,10 +312,10 @@ const Card = React.memo(function Card({
   const [zIndex, setZIndex] = useState(0);
 
   const frameClass =
-    frame === "gold"
-      ? palette.frameGold
-      : frame === "emerald"
-      ? palette.frameEmerald
+    frame === "primary"
+      ? palette.framePrimary
+      : frame === "secondary"
+      ? palette.frameSecondary
       : palette.frameSmoke;
 
   const mobileFloat = isMobile
@@ -331,7 +331,6 @@ const Card = React.memo(function Card({
       style={{ top, left, rotate, zIndex }}
       className={twMerge(
         "absolute rounded-2xl border-2 p-3 pb-7 shadow-lg",
-        // removed backdrop-blur and heavy gradients to lower paint cost:
         "bg-black/10",
         frameClass,
         isMobile ? "cursor-default" : "cursor-grab active:cursor-grabbing",
@@ -341,14 +340,13 @@ const Card = React.memo(function Card({
       drag={isMobile ? false : true}
       dragConstraints={containerRef}
       dragElastic={0.55}
-      dragMomentum={false} /* less work on release */
+      dragMomentum={false}
       whileHover={isMobile ? undefined : { scale: 1.03 }}
       whileTap={{ scale: 1.01 }}
       whileDrag={isMobile ? undefined : { scale: 1.05, rotate: 0 }}
       transition={{ type: "spring", stiffness: 260, damping: 24 }}
       {...mobileFloat}
     >
-      {/* Use next/image for decoding+lazy+sizes */}
       <Image
         src={src}
         alt={alt}
