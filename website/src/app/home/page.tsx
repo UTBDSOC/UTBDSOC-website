@@ -1,10 +1,9 @@
 "use client";
 import Image from "next/image";
-import Navbar from "../components/MQTECHSOC/Navbar";
+import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
 
-import ServicesCards from "../components/TechStartupcomponets/ServicesCards";
-import ContentPages from "../components/TechStartupcomponets/Contentpages";
+
 import EventCard from "../components/EventCard";
 import Footer from "../components/Footer";
 import AboutSection from "../components/AboutSection";
