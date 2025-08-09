@@ -4,22 +4,22 @@ import React, { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 
-/** --- Brand palette --- */
+/** --- Fixed theme palette (simple) --- */
 const colors = {
-  bgGradient: "bg-gradient-to-br from-[#1b1b1b] via-[#221c19] to-[#2d1f15]", // warm charcoal -> deep orange hint
-  ringDim: "stroke-orange-300/30",
-  btn: "bg-orange-500 text-black",
-  btnOutline: "border-orange-500 text-orange-500",
+  bgGradient: "bg-gradient-to-br from-[#0b0f14] via-[#0d131b] to-[#101820]",
+  surface: "bg-[#151a20]",
+  brand: "#ff7a1a",
+  brandSoft: "#ffa45c",
+  ringDim: "stroke-[#ffa45c]/30",
 };
 
 const Hero: React.FC = () => {
   const prefersReduced = useReducedMotion();
 
   return (
-    <div className={["min-h-screen relative overflow-hidden", colors.bgGradient, "text-orange-500"].join(" ")}>
+    <div className={["min-h-screen relative overflow-hidden", colors.bgGradient, "text-neutral-200"].join(" ")}>
       {/* Two-column layout */}
       <div className="mx-auto max-w-7xl min-h-screen grid grid-cols-1 md:grid-cols-2 items-center">
-        
         {/* LEFT: HELLO + Animated Words */}
         <div className="flex items-center justify-center p-8">
           <div className="w-full max-w-3xl">
@@ -54,10 +54,11 @@ const Hero: React.FC = () => {
           <div
             className={[
               "relative rounded-full flex items-center justify-center overflow-hidden",
-              "bg-[#1b1b1b]",
-              "border-4 border-orange-500 shadow-[0_0_60px_rgba(255,100,0,.15)]",
+              colors.surface,
+              "border-4",
+              "shadow-[0_0_60px_rgba(255,122,26,.15)]",
             ].join(" ")}
-            style={{ width: "90%", maxWidth: "600px", aspectRatio: "1 / 1" }}
+            style={{ width: "90%", maxWidth: "600px", aspectRatio: "1 / 1", borderColor: colors.brand as any }}
           >
             {!prefersReduced && <LogoOrbitRing />}
 
@@ -77,11 +78,12 @@ const Hero: React.FC = () => {
       {/* Bottom buttons */}
       <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-4">
         <button
+          aria-label="View events"
           className={[
             "relative px-7 py-3.5 font-semibold rounded-full shadow-md transition duration-300",
-            colors.btn,
+            "bg-[#ff7a1a] text-black",
             "hover:translate-y-[-1px] hover:shadow-lg",
-            "focus:outline-none focus:ring-4 focus:ring-orange-300",
+            "focus:outline-none focus:ring-4 focus:ring-[#ff7a1a]/35",
             "will-change-transform transform-gpu",
             "btn-pulse",
           ].join(" ")}
@@ -89,13 +91,13 @@ const Hero: React.FC = () => {
           Events
         </button>
         <button
+          aria-label="View membership"
           className={[
             "px-7 py-3.5 font-semibold rounded-full transition duration-300",
-            "bg-transparent",
-            colors.btnOutline,
-            "border",
-            "hover:bg-orange-500 hover:text-black",
+            "bg-transparent text-[#ff7a1a] border border-[#ff7a1a]",
+            "hover:bg-[#ff7a1a] hover:text-black",
             "hover:-translate-y-px hover:shadow-lg",
+            "focus:outline-none focus:ring-4 focus:ring-[#ff7a1a]/35",
             "will-change-transform transform-gpu",
           ].join(" ")}
         >
@@ -103,14 +105,14 @@ const Hero: React.FC = () => {
         </button>
       </div>
 
-      {/* global CSS */}
+      {/* global CSS (theme-aligned) */}
       <style jsx global>{`
         .shimmer-text {
           color: transparent;
           background-image: linear-gradient(
             90deg,
             rgba(255, 255, 255, 0.12) 0%,
-            rgba(255, 140, 0, 0.85) 50%,
+            rgba(255, 122, 26, 0.85) 50%,
             rgba(255, 255, 255, 0.12) 100%
           );
           background-size: 200% 100%;
@@ -130,7 +132,7 @@ const Hero: React.FC = () => {
           border-radius: 9999px;
           pointer-events: none;
           animation: btnpulse 1.8s ease-in-out infinite;
-          box-shadow: 0 0 0 rgba(255, 140, 0, 0);
+          box-shadow: 0 0 0 rgba(255, 122, 26, 0);
         }
         @keyframes btnpulse {
           0% { transform: scale(1); opacity: 0.35; }
@@ -190,13 +192,11 @@ const AnimatedText: React.FC<{
               "drop-shadow-[0_2px_12px_rgba(0,0,0,.45)]",
               "will-change-transform transform-gpu",
               "tracking-tight",
-              "text-orange-400",
+              "text-[#ff7a1a]",
             ].join(" ")}
           >
             {phrase.toUpperCase()}
-            <span
-              className={["block h-1 mt-3 bg-orange-500/80 rounded-full", lineWidthClass].join(" ")}
-            />
+            <span className={["block h-1 mt-3 rounded-full", lineWidthClass, "bg-[#ff7a1a]/80"].join(" ")} />
           </motion.div>
         );
       })}
@@ -210,8 +210,8 @@ const LogoOrbitRing: React.FC = () => {
     <svg className="absolute inset-0" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden>
       <defs>
         <linearGradient id="ringGrad" x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0%" stopColor="rgba(255,140,0,.9)" />
-          <stop offset="100%" stopColor="rgba(255,140,0,.1)" />
+          <stop offset="0%" stopColor="#ff7a1a" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="#ff7a1a" stopOpacity="0.1" />
         </linearGradient>
       </defs>
       <circle cx="50" cy="50" r="44" className={colors.ringDim} strokeWidth="1.5" fill="none" />
