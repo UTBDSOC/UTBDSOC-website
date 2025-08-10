@@ -54,7 +54,7 @@ export default function AboutSection() {
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href="/membership"
+                href="https://www.activateuts.com.au/clubs/bangladeshi-society"
                 className="rounded-full bg-[#ff7a1a] px-5 py-2.5 text-sm font-semibold text-black shadow-md transition hover:-translate-y-px hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-[#ff7a1a]/35"
               >
                 Join Now

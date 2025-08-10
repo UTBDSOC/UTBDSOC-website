@@ -109,7 +109,7 @@ const Hero: React.FC = () => {
               "btn-pulse",
             ].join(" ")}
           >
-            Events
+            <a href="/events">Events</a>
           </button>
 
           <button
@@ -126,7 +126,7 @@ const Hero: React.FC = () => {
               "will-change-transform transform-gpu",
             ].join(" ")}
           >
-            Membership
+            <a href="https://www.activateuts.com.au/clubs/bangladeshi-society">Membership</a>
           </button>
         </div>
       </div>

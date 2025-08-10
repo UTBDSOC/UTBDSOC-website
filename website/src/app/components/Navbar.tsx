@@ -13,7 +13,7 @@ import {
 } from "react-icons/fa";
 
 const links = [
-  { href: "/", label: "Home" },
+  { href: "/home", label: "Home" },
   { href: "/about-us", label: "About Us" },
   { href: "/events", label: "Events" },
   { href: "/team", label: "Team" },
@@ -23,32 +23,43 @@ const links = [
 ];
 
 const socials = [
-  { href: "https://discord.com", icon: FaDiscord, label: "Discord" },
-  { href: "https://github.com", icon: FaGithub, label: "GitHub" },
-  { href: "https://youtube.com", icon: FaYoutube, label: "YouTube" },
-  { href: "https://instagram.com", icon: FaInstagram, label: "Instagram" },
-  { href: "https://facebook.com", icon: FaFacebookF, label: "Facebook" },
-  { href: "https://linkedin.com", icon: FaLinkedinIn, label: "LinkedIn" },
+  { href: "https://discord.gg/wQupZgkK", icon: FaDiscord, label: "Discord" },
+  { href: "https://github.com/UTBDSOC", icon: FaGithub, label: "GitHub" },
+  { href: "https://youtube.com/@utsbdsoc", icon: FaYoutube, label: "YouTube" },
+  { href: "https://instagram.com/utsbdsoc", icon: FaInstagram, label: "Instagram" },
+  { href: "https://facebook.com/groups/uts.bdsociety", icon: FaFacebookF, label: "Facebook" },
+  { href: "https://www.linkedin.com/company/uts-bangladeshi-society", icon: FaLinkedinIn, label: "LinkedIn" },
 ];
 
 const Navbar: React.FC = () => {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
   return (
-    <header className="fixed top-0 left-0 z-50 w-full">
+    <header
+      className={[
+        "fixed top-0 left-0 w-full z-[9999]", // sit above everything
+        "supports-[backdrop-filter]:bg-black/10", // subtle tint
+      ].join(" ")}
+    >
       {/* slim accent bar */}
       <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-orange-500/40 to-transparent" />
-      {/* Transparent background for nav */}
-      <div className="bg-transparent">
+
+      {/* Nav bar container (gets a tiny blur on hover) */}
+      <div className="transition">
         <div className="mx-auto max-w-7xl px-4">
-          <nav className="flex h-20 items-center justify-between">
-            {/* Branding */}
+          <nav
+            className={[
+              "flex h-20 items-center gap-4",
+              "supports-[backdrop-filter]:backdrop-blur-0 hover:supports-[backdrop-filter]:backdrop-blur-[2px]",
+              "border-b border-transparent hover:border-orange-500/10",
+            ].join(" ")}
+          >
+            {/* Branding (left) */}
             <Link
               href="/"
               className="flex-shrink-0 font-extrabold text-2xl md:text-3xl tracking-tight text-orange-400 hover:text-orange-300 transition"
@@ -56,46 +67,57 @@ const Navbar: React.FC = () => {
               UTSBDSOC
             </Link>
 
-            {/* Desktop nav */}
-            <ul className="hidden md:flex items-center gap-8 font-medium text-lg">
-              {links.map(({ href, label }) => {
-                const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
-                return (
-                  <li key={href}>
-                    <Link
-                      href={href}
-                      className={[
-                        "relative transition nav-underline",
-                        active
-                          ? "text-orange-300"
-                          : "text-orange-200/80 hover:text-orange-200",
-                      ].join(" ")}
-                    >
-                      {label}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+            {/* Push everything else to the right */}
+            <div className="ml-auto hidden md:flex items-center gap-6">
+              {/* Desktop links (right-aligned) */}
+              <ul className="flex items-center gap-2 font-medium text-lg">
+                {links.map(({ href, label }) => {
+                  const active =
+                    href === "/" ? pathname === "/" : pathname.startsWith(href);
+                  return (
+                    <li key={href}>
+                      <Link
+                        href={href}
+                        className={[
+                          "relative nav-underline rounded-md",
+                          "px-2 py-1 -mx-2 -my-1",
+                          "transition",
+                          // tiny glass hover
+                          "hover:bg-white/5 hover:supports-[backdrop-filter]:backdrop-blur-[2px]",
+                          active
+                            ? "text-orange-300"
+                            : "text-orange-200/80 hover:text-orange-200",
+                        ].join(" ")}
+                      >
+                        {label}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
 
-            {/* Socials + CTA (desktop) */}
-            <div className="hidden md:flex items-center gap-3">
-              {socials.map(({ href, icon: Icon, label }) => (
+              {/* Divider */}
+              <span className="h-6 w-px bg-orange-500/20" />
+
+              {/* Socials (far right) */}
+              <div className="flex items-center gap-3">
+                {socials.map(({ href, icon: Icon, label }) => (
+                  <Link
+                    key={label}
+                    href={href}
+                    aria-label={label}
+                    className="rounded-md p-1 text-orange-300/90 hover:text-orange-200 hover:bg-white/5 hover:supports-[backdrop-filter]:backdrop-blur-[2px] transition"
+                  >
+                    <Icon size={20} />
+                  </Link>
+                ))}
                 <Link
-                  key={label}
-                  href={href}
-                  aria-label={label}
-                  className="text-orange-300/90 hover:text-orange-200 transition"
+                  href="https://www.activateuts.com.au/clubs/bangladeshi-society"
+                  className="ml-1 rounded-full bg-orange-500 px-4 py-2.5 font-semibold text-black shadow hover:bg-orange-400 transition will-change-transform transform-gpu hover:-translate-y-0.5"
                 >
-                  <Icon size={22} />
+                  Membership
                 </Link>
-              ))}
-              <Link
-                href="/membership"
-                className="ml-2 rounded-full bg-orange-500 px-4 py-2.5 font-semibold text-black shadow hover:bg-orange-400 transition will-change-transform transform-gpu hover:-translate-y-0.5"
-              >
-                Membership
-              </Link>
+              </div>
             </div>
 
             {/* Mobile: hamburger */}
@@ -131,10 +153,10 @@ const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile drawer (solid background for readability) */}
+      {/* Mobile drawer */}
       <div
         className={[
-          "md:hidden fixed inset-x-0 top-20 z-40 origin-top bg-[#1b1b1b]/95 border-t border-orange-500/20",
+          "md:hidden fixed inset-x-0 top-20 z-[9999] origin-top bg-[#1b1b1b]/95 border-t border-orange-500/20",
           "transition-transform duration-200 will-change-transform transform-gpu",
           open ? "translate-y-0" : "-translate-y-[120%]",
         ].join(" ")}
@@ -142,13 +164,15 @@ const Navbar: React.FC = () => {
         <div className="mx-auto max-w-7xl px-4 py-6">
           <ul className="space-y-4 text-orange-200/90 text-lg font-medium">
             {links.map(({ href, label }) => {
-              const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+              const active =
+                href === "/" ? pathname === "/" : pathname.startsWith(href);
               return (
                 <li key={href}>
                   <Link
                     href={href}
                     className={[
-                      "block py-2",
+                      "block py-2 rounded-md",
+                      "hover:bg-white/5 hover:supports-[backdrop-filter]:backdrop-blur-[2px]",
                       active ? "text-orange-300" : "hover:text-orange-200",
                     ].join(" ")}
                   >
@@ -165,7 +189,7 @@ const Navbar: React.FC = () => {
                 key={label}
                 href={href}
                 aria-label={label}
-                className="text-orange-300/90 hover:text-orange-200 transition"
+                className="rounded-md p-1 text-orange-300/90 hover:text-orange-200 hover:bg-white/5 hover:supports-[backdrop-filter]:backdrop-blur-[2px] transition"
               >
                 <Icon size={22} />
               </Link>
@@ -181,7 +205,7 @@ const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* tiny CSS underline effect */}
+      {/* underline effect */}
       <style jsx global>{`
         .nav-underline::after {
           content: "";
@@ -192,8 +216,8 @@ const Navbar: React.FC = () => {
           width: 0%;
           background: linear-gradient(
             90deg,
-            rgba(255,140,0,1) 0%,
-            rgba(255,140,0,0.2) 100%
+            rgba(255, 140, 0, 1) 0%,
+            rgba(255, 140, 0, 0.2) 100%
           );
           transition: width 200ms ease;
         }
