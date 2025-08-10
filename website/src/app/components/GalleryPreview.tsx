@@ -5,12 +5,12 @@ import Link from "next/link";
 type Shot = { src: string; alt: string; href?: string };
 
 const SHOTS: Shot[] = [
-  { src: "/images/gallery/party-1.jpg", alt: "Dance floor energy" },
-  { src: "/images/gallery/group-1.jpg", alt: "Friends at an event" },
-  { src: "/images/gallery/crowd-1.jpg", alt: "Cultural night crowd" },
-  { src: "/images/gallery/party-2.jpg", alt: "Party highlights" },
-  { src: "/images/gallery/color-fest.jpg", alt: "Color festival celebration" }, // large tile
-  { src: "/images/gallery/opera-night.jpg", alt: "Sydney evening vibes" },
+  { src: "/2-copy.png.webp", alt: "Abstract design with vibrant colors" },
+  { src: "/AR6_3535-1024x683.jpg.webp", alt: "A scenic view of a natural landscape" },
+  { src: "/BDSOC-logo_transparent-2-1.png.webp", alt: "BDSOC transparent logo" },
+  { src: "/IMG_3697-1024x683.jpg.webp", alt: "Event attendees enjoying the program" },
+  { src: "/IMG_7204-edited.jpg.webp", alt: "Group photo of participants" },
+  { src: "/Photography-By_Md-Jahangir_0058-1024x681.jpg.webp", alt: "Traditional Bangladeshi cultural performance" },
 ];
 
 export default function GalleryPreview({ seamlessTop = true }: { seamlessTop?: boolean }) {

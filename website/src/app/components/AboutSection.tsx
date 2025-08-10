@@ -6,8 +6,8 @@ import { useMemo } from "react";
 export default function AboutSection() {
   const photos = useMemo(
     () => [
-      { src: "/images/about/group-1.jpg", alt: "UTSBDSOC group photo at Alumni Green" },
-      { src: "/images/about/group-2.jpg", alt: "Students enjoying cultural night" },
+      { src: "/IMG_3697-1024x683.jpg.webp", alt: "Attendees enjoying a vibrant event" },
+      { src: "/Photography-By_Md-Jahangir_0058-1024x681.jpg.webp", alt: "Traditional Bangladeshi cultural performance" },
     ],
     []
   );

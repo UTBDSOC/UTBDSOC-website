@@ -17,7 +17,7 @@ const HIGHLIGHTS: Highlight[] = [
     date: "20 Apr 2024",
     stats: "300+ attendees",
     href: "/gallery/pohela-boishakh-2024",
-    image: "/images/highlights/pohela-2024.jpg",
+    image: "/pohela-boishakh-celebration.png",
     tags: ["Cultural", "Food", "Dance"],
   },
   {
@@ -25,7 +25,7 @@ const HIGHLIGHTS: Highlight[] = [
     date: "15 Mar 2025",
     stats: "120+ attendees",
     href: "/gallery/games-night-t1-2025",
-    image: "/images/highlights/games-t1-2025.jpg",
+    image: "/IMG_3697-1024x683.jpg.webp",
     tags: ["Social", "Networking"],
   },
   {
@@ -33,7 +33,7 @@ const HIGHLIGHTS: Highlight[] = [
     date: "28 Sep 2023",
     stats: "Sold Out",
     href: "/gallery/shondartara-2023",
-    image: "/images/highlights/shondartara-2023.jpg",
+    image: "/Photography-By_Md-Jahangir_0058-1024x681.jpg.webp",
     tags: ["Music", "Dance"],
   },
 ];

@@ -3,9 +3,15 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-type EventStatus = "UPCOMING" | "LIMITED" | "SOLD_OUT" | "CANCELLED" | "LIVE" | "ENDED";
+export type EventStatus =
+  | "UPCOMING"
+  | "LIMITED"
+  | "SOLD_OUT"
+  | "CANCELLED"
+  | "LIVE"
+  | "ENDED";
 
-interface EventCardProps {
+export interface EventCardProps {
   title: string;
   tags?: string[];
   description: string;
@@ -21,9 +27,18 @@ interface EventCardProps {
   buttonLink: string;
 
   hoverTilt?: boolean;
-  cardBgClassName?: string; // controls the card background
+  cardBgClassName?: string;
+
+  layout?: "image-left" | "image-right" | "vertical";
+  featured?: boolean;
+  capacityUsed?: number;
+  capacityTotal?: number;
+  enableShare?: boolean;
+  enableDirections?: boolean;
+  enableSeoJsonLd?: boolean;
 }
 
+/* ---------- utils ---------- */
 function formatDateRange(startISO: string, endISO?: string) {
   const start = new Date(startISO);
   const end = endISO ? new Date(endISO) : undefined;
@@ -87,8 +102,11 @@ function makeICS({
 }) {
   const uid = `${crypto.randomUUID()}@utsbdsoc`;
   const dtStart = new Date(startISO);
-  const dtEnd = endISO ? new Date(endISO) : new Date(dtStart.getTime() + 2 * 60 * 60 * 1000);
-  const toICS = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
+  const dtEnd = endISO
+    ? new Date(endISO)
+    : new Date(dtStart.getTime() + 2 * 60 * 60 * 1000);
+  const toICS = (d: Date) =>
+    d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
 
   const ics = [
     "BEGIN:VCALENDAR",
@@ -112,22 +130,19 @@ function makeICS({
   return URL.createObjectURL(blob);
 }
 
-/** THEME — single palette chips (brand + neutrals only) */
+/** THEME — brand chips */
 const statusChip: Record<EventStatus, string> = {
   UPCOMING:
     "text-[#ff7a1a] border-[#ff7a1a]/50 bg-[rgba(255,122,26,0.10)]",
   LIMITED:
     "text-[#ffa45c] border-[#ffa45c]/50 bg-[rgba(255,164,92,0.10)]",
-  LIVE:
-    "text-black border-[#ff7a1a]/60 bg-[#ff7a1a]/90",
-  SOLD_OUT:
-    "text-[#cbd5e1] border-[#2f353d] bg-[#11161c]/80",
-  CANCELLED:
-    "text-[#cbd5e1] border-[#2f353d] bg-[#0f141a]/80",
-  ENDED:
-    "text-[#9aa4af] border-[#2f353d] bg-[#0f141a]/60",
+  LIVE: "text-black border-[#ff7a1a]/60 bg-[#ff7a1a]/90",
+  SOLD_OUT: "text-[#cbd5e1] border-[#2f353d] bg-[#11161c]/80",
+  CANCELLED: "text-[#cbd5e1] border-[#2f353d] bg-[#0f141a]/80",
+  ENDED: "text-[#9aa4af] border-[#2f353d] bg-[#0f141a]/60",
 };
 
+/* ---------- component ---------- */
 const EventCard: React.FC<EventCardProps> = ({
   title,
   tags = [],
@@ -141,16 +156,26 @@ const EventCard: React.FC<EventCardProps> = ({
   buttonText,
   buttonLink,
   hoverTilt = true,
-  cardBgClassName = "bg-[#151a20]", // default: matches Hero surface
+  cardBgClassName = "bg-[#151a20]",
+
+  layout = "image-right",
+  featured = false,
+  capacityUsed,
+  capacityTotal,
+  enableShare = true,
+  enableDirections = true,
+  enableSeoJsonLd = true,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [icsUrl, setIcsUrl] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [imgError, setImgError] = useState(false); // <-- NEW
   const cardRef = useRef<HTMLDivElement | null>(null);
   const cd = useCountdown(startISO);
 
   useEffect(() => setMounted(true), []);
 
+  // derive runtime status (LIMITED only from incoming prop)
   const derivedStatus: EventStatus = useMemo(() => {
     if (status === "SOLD_OUT" || status === "CANCELLED") return status;
     if (!cd.past) return "UPCOMING";
@@ -186,7 +211,8 @@ const EventCard: React.FC<EventCardProps> = ({
   }, []);
 
   const renderLocation = () => {
-    const base = "underline decoration-dotted underline-offset-4 hover:text-[#ffa45c]";
+    const base =
+      "underline decoration-dotted underline-offset-4 hover:text-[#ffa45c]";
     if (!locationUrl) return <span itemProp="name">{location}</span>;
     if (locationUrl.startsWith("/")) {
       return (
@@ -196,11 +222,48 @@ const EventCard: React.FC<EventCardProps> = ({
       );
     }
     return (
-      <a href={locationUrl} target="_blank" rel="noopener noreferrer" className={base} itemProp="url">
+      <a
+        href={locationUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={base}
+        itemProp="url"
+      >
         <span itemProp="name">{location}</span>
       </a>
     );
   };
+
+  // LIMITED capacity only from status prop (no TS conflict)
+  const limitedPct =
+    status === "LIMITED" && capacityUsed != null && capacityTotal
+      ? Math.max(
+          0,
+          Math.min(100, Math.round((capacityUsed / capacityTotal) * 100))
+        )
+      : null;
+
+  const isImageLeft = layout === "image-left";
+  const mediaOrder = isImageLeft ? "md:order-1" : "md:order-2";
+  const textOrder = isImageLeft ? "md:order-2" : "md:order-1";
+
+  const onShare = async () => {
+    try {
+      const shareData = { title, text: description, url: buttonLink };
+      if (navigator.share) await navigator.share(shareData);
+      else {
+        await navigator.clipboard.writeText(buttonLink);
+        alert("Link copied!");
+      }
+    } catch {}
+  };
+
+  const isMaps =
+    !!locationUrl &&
+    (locationUrl.includes("google.com/maps") ||
+      locationUrl.includes("maps.apple.com"));
+
+  const statusForChip = status ?? derivedStatus;
 
   return (
     <article
@@ -209,7 +272,7 @@ const EventCard: React.FC<EventCardProps> = ({
         "relative mx-auto max-w-5xl group",
         "rounded-2xl border border-[#2a2f36]",
         cardBgClassName,
-        "p-6 md:p-10",
+        featured ? "p-8 md:p-12" : "p-6 md:p-8",
         "shadow-[0_10px_30px_rgba(0,0,0,0.35)]",
         "transition-all duration-700 will-change-transform",
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6",
@@ -218,38 +281,27 @@ const EventCard: React.FC<EventCardProps> = ({
       itemScope
       itemType="https://schema.org/Event"
     >
-      {/* Glow (brand-only) */}
+      {/* Glow */}
       <div className="pointer-events-none absolute inset-0 rounded-2xl">
         <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#ff7a1a]/10 via-[#ffa45c]/8 to-[#ff7a1a]/10 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />
         <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-[#2f353d]" />
       </div>
 
       <div className="relative z-10 flex flex-col md:flex-row md:items-stretch md:space-x-8 space-y-6 md:space-y-0">
-        {/* Text */}
-        <div className="flex-1 space-y-5 text-[#C9D1D9]">
+        {/* TEXT */}
+        <div className={`flex-1 space-y-5 text-[#C9D1D9] ${textOrder}`}>
           <header className="space-y-3">
-            <div className="flex items-center gap-2">
-              <span
-                className={[
-                  "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold tracking-wide",
-                  statusChip[derivedStatus],
-                ].join(" ")}
-              >
-                {derivedStatus.replace("_", " ")}
-              </span>
-
-              {!cd.past && mounted && (
-                <span className="ml-1 text-xs text-[#9aa4af]" suppressHydrationWarning>
-                  Starts in {cd.days}d {cd.hours}h {cd.minutes}m {cd.seconds}s
-                </span>
-              )}
-            </div>
-
             <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight" itemProp="name">
               <span className="bg-gradient-to-r from-[#ffa45c] via-[#ff7a1a] to-[#ffa45c] bg-clip-text text-transparent">
                 {title}
               </span>
             </h2>
+
+            {!cd.past && mounted && (
+              <div className="text-xs text-[#9aa4af]" suppressHydrationWarning>
+                Starts in {cd.days}d {cd.hours}h {cd.minutes}m {cd.seconds}s
+              </div>
+            )}
 
             <p className="text-sm text-[#9aa4af]" itemProp="startDate" content={startISO}>
               {formatDateRange(startISO, endISO)}
@@ -258,6 +310,15 @@ const EventCard: React.FC<EventCardProps> = ({
             <p className="text-sm text-[#9aa4af]" itemProp="location" itemScope itemType="https://schema.org/Place">
               {renderLocation()}
             </p>
+
+            {limitedPct !== null && (
+              <div className="flex items-center gap-2 text-xs text-[#9aa4af]">
+                <div className="h-2 w-32 rounded-full bg-[#11161c]/80 border border-[#2f353d] overflow-hidden">
+                  <div className="h-full bg-[#ffa45c]" style={{ width: `${limitedPct}%` }} />
+                </div>
+                <span>{limitedPct}% full</span>
+              </div>
+            )}
           </header>
 
           {tags.length > 0 && (
@@ -286,9 +347,11 @@ const EventCard: React.FC<EventCardProps> = ({
                 "border border-[#ff7a1a]/60 px-5 py-2.5 text-sm font-semibold text-[#ffa45c]",
                 "transition-all hover:shadow-[0_0_24px_rgba(255,122,26,0.35)] hover:text-black",
                 "hover:bg-gradient-to-r hover:from-[#ff7a1a] hover:to-[#ffa45c]",
-                derivedStatus === "SOLD_OUT" || derivedStatus === "CANCELLED" ? "pointer-events-none opacity-50" : "",
+                status === "SOLD_OUT" || status === "CANCELLED"
+                  ? "pointer-events-none opacity-50"
+                  : "",
               ].join(" ")}
-              aria-disabled={derivedStatus === "SOLD_OUT" || derivedStatus === "CANCELLED"}
+              aria-disabled={status === "SOLD_OUT" || status === "CANCELLED"}
             >
               <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent opacity-0 transition-all duration-700 group-hover:opacity-100 group-hover:translate-x-full" />
               <span className="relative flex items-center">
@@ -315,36 +378,108 @@ const EventCard: React.FC<EventCardProps> = ({
                 Add to Calendar
               </a>
             )}
+
+            {enableDirections && isMaps && locationUrl && (
+              <a
+                href={locationUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center rounded-full border border-[#2f353d] bg-[#121821] px-4 py-2 text-xs font-semibold text-[#cbd5e1] hover:border-[#ffa45c]/40 hover:text-[#ffa45c] transition-colors"
+              >
+                Directions
+              </a>
+            )}
+
+            {enableShare && (
+              <button
+                onClick={onShare}
+                className="inline-flex items-center rounded-full border border-[#2f353d] bg-[#121821] px-4 py-2 text-xs font-semibold text-[#cbd5e1] hover:border-[#ffa45c]/40 hover:text-[#ffa45c] transition-colors"
+              >
+                Share
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Image */}
-        <div className="md:w-1/2">
+        {/* IMAGE + status ribbon */}
+        <div className={`md:w-1/2 ${mediaOrder}`}>
           <div className="relative overflow-hidden rounded-xl border border-[#2a2f36] bg-[#0d131b]">
+            <div className="absolute left-3 top-3 z-10">
+              <span
+                className={[
+                  "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold tracking-wide",
+                  statusChip[statusForChip],
+                ].join(" ")}
+              >
+                {statusForChip.replace("_", " ")}
+              </span>
+            </div>
+
             <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-[#2f353d]" />
+
             <div className="aspect-[16/9] w-full">
-              <Image
-                src={imageUrl}
-                alt={title}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover transition-transform duration-700 will-change-transform group-hover:scale-[1.03]"
-                priority={false}
-              />
+              {!imgError ? (
+                <Image
+                  src={imageUrl}
+                  alt={title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover transition-transform duration-700 will-change-transform group-hover:scale-[1.03]"
+                  priority={false}
+                  onError={() => setImgError(true)} // <-- safe fallback
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#0d131b] to-[#151a20]">
+                  <span className="text-3xl font-bold text-[#ffa45c]">
+                    {title
+                      .split(" ")
+                      .slice(0, 2)
+                      .map((s) => s[0])
+                      .join("")
+                      .toUpperCase()}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Subtle brand dots */}
+      {/* dots */}
       <div
         aria-hidden
         className="pointer-events-none absolute -right-6 -bottom-6 h-24 w-24 opacity-30"
         style={{
-          backgroundImage: "radial-gradient(rgba(255,122,26,0.15) 1px, transparent 1px)",
+          backgroundImage:
+            "radial-gradient(rgba(255,122,26,0.15) 1px, transparent 1px)",
           backgroundSize: "8px 8px",
         }}
       />
+
+      {enableSeoJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Event",
+              name: title,
+              startDate: startISO,
+              endDate: endISO ?? undefined,
+              eventStatus:
+                (status ?? derivedStatus) === "CANCELLED"
+                  ? "https://schema.org/EventCancelled"
+                  : (status ?? derivedStatus) === "ENDED"
+                  ? "https://schema.org/EventCompleted"
+                  : undefined,
+              location: { "@type": "Place", name: location, url: locationUrl },
+              image: imageUrl,
+              description,
+              url: buttonLink,
+            }),
+          }}
+        />
+      )}
     </article>
   );
 };
