@@ -170,7 +170,12 @@ export default function EventsPage() {
   return (
     <>
       <Navbar />
-
+     {/* Featured banner (auto-picks next upcoming) */}
+        {featured && (
+          <div className="px-4 md:px-8">
+            <FeaturedEventBanner event={featured} />
+          </div>
+        )}
       <main className="min-h-screen pt-20 md:pt-24 bg-gradient-to-b from-[#0b0f14] via-[#0d131b] to-[#101820] text-orange-50">
         {/* Hero */}
         <section className="px-4 md:px-8 py-6 md:py-10 border-b border-white/10">
@@ -185,12 +190,7 @@ export default function EventsPage() {
         {/* Grid + modal */}
         <EventsGrid items={EVENTS} initialVisible={6} />
 
-        {/* Featured banner (auto-picks next upcoming) */}
-        {featured && (
-          <div className="px-4 md:px-8">
-            <FeaturedEventBanner event={featured} />
-          </div>
-        )}
+       
 
         {/* Gallery teaser */}
         <div className="px-4 md:px-8">

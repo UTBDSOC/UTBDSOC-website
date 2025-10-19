@@ -3,162 +3,146 @@
 import React, { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
+import FixedFloaters, { Floater } from "@/components/FixedFloaters";
 
-/** --- Fixed theme palette (simple) --- */
+/* --- Theme --- */
 const colors = {
-  bgGradient: "bg-gradient-to-br from-[#0b0f14] via-[#0d131b] to-[#101820]",
-  surface: "bg-[#151a20]",
   brand: "#ff7a1a",
-  brandSoft: "#ffa45c",
   ringDim: "stroke-[#ffa45c]/30",
+  surface: "bg-[#151a20]",
 };
 
 const Hero: React.FC = () => {
   const prefersReduced = useReducedMotion();
 
-  return (
-    <div className={["min-h-screen relative overflow-hidden", colors.bgGradient, "text-neutral-200"].join(" ")}>
-      {/* Two-column layout */}
-      <div className="mx-auto max-w-7xl min-h-screen grid grid-cols-1 md:grid-cols-2 items-center">
-        {/* LEFT: HELLO + Animated Words */}
-        <div className="flex items-center justify-center p-8">
-          <div className="w-full max-w-3xl">
-            <motion.h1
-              initial={{ opacity: 0, x: -40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, ease: "easeOut" }}
-              className={[
-                "font-extrabold leading-none",
-                "text-7xl md:text-[8rem] lg:text-[10rem]",
-                "tracking-tight",
-                "shimmer-text",
-              ].join(" ")}
-            >
-              HELLO
-            </motion.h1>
+  /* Floaters (uses YOUR FixedFloaters.tsx component) */
+  const FLOATERS: Floater[] = [
+    { id: "tl-1", size: 200, top: 6, left: 6, imageSrc: "/bubbles/image-1-1024x768.jpg.webp", ring: "rgba(255,164,92,0.35)", floatAmp: 10, floatDur: 8, floatDelay: 0.1 },
+    { id: "tl-2", size: 150, top: 14, left: 14, imageSrc: "/bubbles/IMG_0357-1-edited-1.jpeg.webp", ring: "rgba(255,122,26,0.35)", floatAmp: 10, floatDur: 8, floatDelay: 0.3 },
+    { id: "tr-1", size: 200, top: 8, right: 8, imageSrc: "/bubbles/IMG_3698-1024x683.jpg.webp", ring: "rgba(255,164,92,0.35)", floatAmp: 10, floatDur: 8, floatDelay: 0.25 },
+    { id: "tr-2", size: 150, top: 50, right: 14, imageSrc: "/bubbles/AR6_3535-1024x683.jpg.webp", ring: "rgba(255,164,92,0.35)", floatAmp: 10, floatDur: 8, floatDelay: 0.45 },
+    { id: "bl-1", size: 110, bottom: 10, left: 8, imageSrc: "/bubbles/IMG_0880-1024x681.jpg.webp", ring: "rgba(255,164,92,0.35)", floatAmp: 10, floatDur: 8, floatDelay: 0.5 },
+    { id: "bl-2", size: 110, bottom: 18, left: 14, imageSrc: "/bubbles/Photography-By_Md-Jahangir_0071-1024x681.jpg.webp", ring: "rgba(255,122,26,0.35)", floatAmp: 10, floatDur: 8, floatDelay: 0.7 },
+    { id: "br-1", size: 220, bottom: 8, right: 10, imageSrc: "/bubbles/IMG_1867-e1722353135831-1024x652.jpg.webp", ring: "rgba(255,164,92,0.35)", floatAmp: 10, floatDur: 8, floatDelay: 0.65 },
+    { id: "br-2", size: 110, bottom: 16, right: 16, imageSrc: "/bubbles/Photography-By_Md-Jahangir_0155-1024x681.jpg.webp", ring: "rgba(255,122,26,0.35)", floatAmp: 10, floatDur: 8, floatDelay: 0.85 },
+  ];
 
-            <div className="mt-6 md:mt-8">
-              <AnimatedText
-                phrases={["Students", "Alumni", "Staff", "Public"]}
-                disableAnimation={prefersReduced ?? false}
-                fontSizeClasses="text-4xl md:text-6xl lg:text-7xl"
-                lineWidthClass="w-28 md:w-36 lg:w-44"
-                heightClass="h-[4.5rem] md:h-[6rem] lg:h-[7rem]"
+  return (
+    <div className="relative min-h-[100svh] overflow-hidden text-neutral-200">
+      {/* ===== BACKGROUND IMAGE (stage fade-in look) ===== */}
+      <motion.div
+        className="absolute inset-0 z-0"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1.8, ease: "easeOut" }}
+      >
+        <Image
+          src="/THEDESIBALL-PHP#267.jpg" // your uploaded image
+          alt="Stage dancers background"
+          fill
+          priority
+          className="object-cover object-center opacity-[0.6] saturate-[0.8] contrast-[1.1]"
+        />
+        {/* green-gold soft light wash */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(13,33,23,0.4)_0%,rgba(5,10,8,0.9)_100%)] mix-blend-multiply" />
+        {/* golden vertical tone */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#2a4022]/25 via-[#0a0d0b]/70 to-[#0a0d0b]/95" />
+        {/* vignette edge darkening */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0)_45%,rgba(0,0,0,0.85)_100%)]" />
+      </motion.div>
+
+      {/* ===== FLOATING BUBBLES + CONTENT ===== */}
+      <FixedFloaters
+        items={FLOATERS}
+        safeArea={{ x: 22, y: 14, w: 56, h: 64 }}
+        edgePadding={18}
+        zIndex={1}
+      >
+        <div className="relative z-10 mx-auto max-w-7xl min-h-[100svh] grid grid-cols-1 md:grid-cols-2 items-center">
+          {/* LEFT: HELLO + AnimatedText */}
+          <div className="flex items-center justify-center p-6 md:p-8">
+            <div className="w-full max-w-3xl">
+              <div className="relative inline-block">
+                <motion.h1
+                  initial={{ opacity: 0, x: -40 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.7, ease: "easeOut" }}
+                  className="font-extrabold leading-none text-7xl md:text-[8rem] lg:text-[10rem] tracking-tight shimmer-text"
+                >
+                  HELLO
+                </motion.h1>
+                <span className="absolute inset-[-12px] rounded-md border border-white/30 md:inset-[-16px]" aria-hidden />
+              </div>
+
+              <div className="mt-6 md:mt-8">
+                <AnimatedText
+                  phrases={["Students", "Alumni", "Staff", "Public"]}
+                  disableAnimation={prefersReduced ?? false}
+                  fontSizeClasses="text-4xl md:text-6xl lg:text-7xl"
+                  lineWidthClass="w-28 md:w-36 lg:w-44"
+                  heightClass="h-[4.5rem] md:h-[6rem] lg:h-[7rem]"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT: Circular Logo */}
+          <div className="flex items-center justify-center p-6 md:p-8">
+            <div
+              className={`relative rounded-full flex items-center justify-center overflow-hidden ${colors.surface} border-4 shadow-[0_0_60px_rgba(255,122,26,.15)]`}
+              style={{
+                width: "90%",
+                maxWidth: "620px",
+                aspectRatio: "1 / 1",
+                borderColor: colors.brand,
+              }}
+            >
+              {!prefersReduced && <LogoOrbitRing />}
+              <Image
+                src="/BDSOC-logo_transparent-2-1.png.webp"
+                alt="UTSBDSOC Logo"
+                width={800}
+                height={800}
+                priority
+                className="object-contain p-6"
               />
             </div>
           </div>
         </div>
+      </FixedFloaters>
 
-        {/* RIGHT: Large Circular Logo */}
-        <div className="flex items-center justify-center p-8">
-          <div
-            className={[
-              "relative rounded-full flex items-center justify-center overflow-hidden",
-              colors.surface,
-              "border-4",
-              "shadow-[0_0_60px_rgba(255,122,26,.15)]",
-            ].join(" ")}
-            style={{ width: "90%", maxWidth: "600px", aspectRatio: "1 / 1", borderColor: colors.brand as any }}
+      {/* ===== Bottom Buttons ===== */}
+      <div className="absolute left-0 right-0 bottom-4 px-4 pb-[env(safe-area-inset-bottom)] md:bottom-8 md:px-0 flex justify-center z-20">
+        <div className="w-full max-w-md flex flex-col gap-3 md:max-w-none md:w-auto md:flex-row md:gap-4">
+          <a
+            href="/events"
+            className="relative font-semibold rounded-2xl shadow-lg transition bg-[#ff7a1a] text-black w-full py-4 text-base md:w-auto md:px-7 md:py-3.5 md:text-sm hover:translate-y-[-1px] hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#ff7a1a]/35 will-change-transform transform-gpu btn-pulse text-center"
           >
-            {!prefersReduced && <LogoOrbitRing />}
-
-            <Image
-              src="/BDSOC-logo_transparent-2-1.png.webp"
-              alt="UTSBDSOC Logo"
-              width={800}
-              height={800}
-              priority
-              sizes="(max-width: 768px) 80vw, 600px"
-              className="object-contain p-6"
-            />
-          </div>
+            Events
+          </a>
+          <a
+            href="https://www.activateuts.com.au/clubs/bangladeshi-society"
+            className="relative font-semibold rounded-2xl transition border border-[#ff7a1a] text-[#ff7a1a] bg-white/0 w-full py-4 text-base md:w-auto md:px-7 md:py-3.5 md:text-sm hover:bg-[#ff7a1a] hover:text-black hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#ff7a1a]/35 will-change-transform transform-gpu text-center"
+          >
+            Membership
+          </a>
         </div>
       </div>
 
-      {/* Bottom buttons (mobile-first, desktop unchanged) */}
-      <div
-        className={[
-          "absolute left-0 right-0",
-          // mobile: safe-area + side padding + closer to bottom
-          "bottom-4 px-4 pb-[env(safe-area-inset-bottom)]",
-          // desktop: original spacing
-          "md:bottom-8 md:px-0",
-          "flex justify-center",
-        ].join(" ")}
-      >
-        <div
-          className={[
-            // mobile: stack + full width
-            "w-full max-w-md flex flex-col gap-3",
-            // desktop: row layout like before
-            "md:max-w-none md:w-auto md:flex-row md:gap-4",
-          ].join(" ")}
-        >
-          <button
-            aria-label="View events"
-            className={[
-              "relative font-semibold rounded-2xl shadow-lg transition",
-              "bg-[#ff7a1a] text-black",
-              // mobile: bigger touch area + full width
-              "w-full py-4 text-base",
-              // desktop sizing
-              "md:w-auto md:px-7 md:py-3.5 md:text-sm",
-              "hover:translate-y-[-1px] hover:shadow-xl",
-              "focus:outline-none focus:ring-4 focus:ring-[#ff7a1a]/35",
-              "will-change-transform transform-gpu",
-              "btn-pulse",
-            ].join(" ")}
-          >
-            <a href="/events">Events</a>
-          </button>
-
-          <button
-            aria-label="View membership"
-            className={[
-              "relative font-semibold rounded-2xl transition",
-              "border border-[#ff7a1a] text-[#ff7a1a] bg-white/0",
-              // mobile: bigger touch area + full width
-              "w-full py-4 text-base",
-              // desktop sizing
-              "md:w-auto md:px-7 md:py-3.5 md:text-sm",
-              "hover:bg-[#ff7a1a] hover:text-black hover:shadow-xl",
-              "focus:outline-none focus:ring-4 focus:ring-[#ff7a1a]/35",
-              "will-change-transform transform-gpu",
-            ].join(" ")}
-          >
-            <a href="https://www.activateuts.com.au/clubs/bangladeshi-society">Membership</a>
-          </button>
-        </div>
-      </div>
-
-      {/* global CSS (theme-aligned) */}
+      {/* ===== Global styles ===== */}
       <style jsx global>{`
-        :root {
-          --safe-bottom: env(safe-area-inset-bottom);
-        }
         .shimmer-text {
           color: transparent;
-          background-image: linear-gradient(
-            90deg,
-            rgba(255, 255, 255, 0.12) 0%,
-            rgba(255, 122, 26, 0.85) 50%,
-            rgba(255, 255, 255, 0.12) 100%
-          );
+          background-image: linear-gradient(90deg, #b2b874 0%, #f8f8f8 50%, #b2b874 100%);
           background-size: 200% 100%;
           -webkit-background-clip: text;
           background-clip: text;
           animation: shimmer 3.5s ease-in-out infinite;
         }
         @keyframes shimmer {
-          0% {
-            background-position: 200% 0;
-          }
-          50% {
-            background-position: 100% 0;
-          }
-          100% {
-            background-position: 0% 0;
-          }
+          0% { background-position: 200% 0; }
+          50% { background-position: 100% 0; }
+          100% { background-position: 0% 0; }
         }
         .btn-pulse::after {
           content: "";
@@ -170,25 +154,16 @@ const Hero: React.FC = () => {
           box-shadow: 0 0 0 rgba(255, 122, 26, 0);
         }
         @keyframes btnpulse {
-          0% {
-            transform: scale(1);
-            opacity: 0.35;
-          }
-          70% {
-            transform: scale(1.15);
-            opacity: 0;
-          }
-          100% {
-            transform: scale(1.15);
-            opacity: 0;
-          }
+          0% { transform: scale(1); opacity: 0.35; }
+          70% { transform: scale(1.15); opacity: 0; }
+          100% { transform: scale(1.15); opacity: 0; }
         }
       `}</style>
     </div>
   );
 };
 
-/* AnimatedText */
+/* ===== AnimatedText ===== */
 const ONE_SECOND = 1000;
 const WAIT_TIME = ONE_SECOND * 3;
 
@@ -206,12 +181,11 @@ const AnimatedText: React.FC<{
   heightClass = "h-16 md:h-20",
 }) => {
   const [active, setActive] = useState(0);
-
   useEffect(() => {
     if (disableAnimation) return;
     const id = setInterval(() => {
       if (document.hidden) return;
-      setActive((prev) => (prev + 1) % phrases.length);
+      setActive((p) => (p + 1) % phrases.length);
     }, WAIT_TIME);
     return () => clearInterval(id);
   }, [phrases, disableAnimation]);
@@ -233,14 +207,11 @@ const AnimatedText: React.FC<{
             className={[
               "absolute font-bold",
               fontSizeClasses,
-              "drop-shadow-[0_2px_12px_rgba(0,0,0,.45)]",
-              "will-change-transform transform-gpu",
-              "tracking-tight",
-              "text-[#ff7a1a]",
+              "drop-shadow-[0_2px_12px_rgba(0,0,0,.45)] tracking-tight text-[#ff7a1a]",
             ].join(" ")}
           >
             {phrase.toUpperCase()}
-            <span className={["block h-1 mt-3 rounded-full", lineWidthClass, "bg-[#ff7a1a]/80"].join(" ")} />
+            <span className={`block h-1 mt-3 rounded-full ${lineWidthClass} bg-[#ff7a1a]/80`} />
           </motion.div>
         );
       })}
@@ -248,31 +219,29 @@ const AnimatedText: React.FC<{
   );
 };
 
-/* Orbit Ring */
-const LogoOrbitRing: React.FC = () => {
-  return (
-    <svg className="absolute inset-0" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden>
-      <defs>
-        <linearGradient id="ringGrad" x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0%" stopColor="#ff7a1a" stopOpacity="0.9" />
-          <stop offset="100%" stopColor="#ff7a1a" stopOpacity="0.1" />
-        </linearGradient>
-      </defs>
-      <circle cx="50" cy="50" r="44" className={colors.ringDim} strokeWidth="1.5" fill="none" />
-      <circle
-        cx="50"
-        cy="50"
-        r="44"
-        stroke="url(#ringGrad)"
-        strokeWidth="3"
-        strokeLinecap="round"
-        fill="none"
-        strokeDasharray="60 260"
-      >
-        <animate attributeName="stroke-dashoffset" values="0;320" dur="8s" repeatCount="indefinite" />
-      </circle>
-    </svg>
-  );
-};
+/* ===== Logo Orbit Ring ===== */
+const LogoOrbitRing: React.FC = () => (
+  <svg className="absolute inset-0" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden>
+    <defs>
+      <linearGradient id="ringGrad" x1="0" x2="1" y1="0" y2="1">
+        <stop offset="0%" stopColor="#ff7a1a" stopOpacity="0.9" />
+        <stop offset="100%" stopColor="#ff7a1a" stopOpacity="0.1" />
+      </linearGradient>
+    </defs>
+    <circle cx="50" cy="50" r="44" className={colors.ringDim} strokeWidth="1.5" fill="none" />
+    <circle
+      cx="50"
+      cy="50"
+      r="44"
+      stroke="url(#ringGrad)"
+      strokeWidth="3"
+      strokeLinecap="round"
+      fill="none"
+      strokeDasharray="60 260"
+    >
+      <animate attributeName="stroke-dashoffset" values="0;320" dur="8s" repeatCount="indefinite" />
+    </circle>
+  </svg>
+);
 
 export default Hero;
