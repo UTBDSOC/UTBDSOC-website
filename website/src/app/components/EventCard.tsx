@@ -143,7 +143,7 @@ const statusChip: Record<EventStatus, string> = {
 };
 
 /* ---------- component ---------- */
-const EventCard: React.FC<EventCardProps> = ({
+const  EventCard: React.FC<EventCardProps> = ({
   title,
   tags = [],
   description,

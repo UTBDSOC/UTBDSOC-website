@@ -1,11 +1,11 @@
+// app/components/Hero.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
-import FixedFloaters, { Floater } from "@/components/FixedFloaters";
+import FixedFloaters, { Floater } from "../components/FixedFloaters";
 
-/* --- Theme --- */
 const colors = {
   brand: "#ff7a1a",
   ringDim: "stroke-[#ffa45c]/30",
@@ -15,7 +15,6 @@ const colors = {
 const Hero: React.FC = () => {
   const prefersReduced = useReducedMotion();
 
-  /* Floaters (uses YOUR FixedFloaters.tsx component) */
   const FLOATERS: Floater[] = [
     { id: "tl-1", size: 200, top: 6, left: 6, imageSrc: "/bubbles/image-1-1024x768.jpg.webp", ring: "rgba(255,164,92,0.35)", floatAmp: 10, floatDur: 8, floatDelay: 0.1 },
     { id: "tl-2", size: 150, top: 14, left: 14, imageSrc: "/bubbles/IMG_0357-1-edited-1.jpeg.webp", ring: "rgba(255,122,26,0.35)", floatAmp: 10, floatDur: 8, floatDelay: 0.3 },
@@ -29,35 +28,50 @@ const Hero: React.FC = () => {
 
   return (
     <div className="relative min-h-[100svh] overflow-hidden text-neutral-200">
-      {/* ===== BACKGROUND IMAGE (stage fade-in look) ===== */}
-      <motion.div
-        className="absolute inset-0 z-0"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1.8, ease: "easeOut" }}
-      >
+      {/* ===== FADED STAGE BACKGROUND ===== */}
+      <div className="absolute inset-0 z-0">
         <Image
-          src="/THEDESIBALL-PHP#267.jpg" // your uploaded image
-          alt="Stage dancers background"
+          src="/desiball-stage.jpg" // make sure this path exists in /public
+          alt="UTSBDSOC Stage Background"
           fill
           priority
-          className="object-cover object-center opacity-[0.6] saturate-[0.8] contrast-[1.1]"
+          className={`
+            object-cover
+            [object-position:center_35%]
+            opacity-70
+            saturate-90
+            contrast-105
+          `}
         />
-        {/* green-gold soft light wash */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(13,33,23,0.4)_0%,rgba(5,10,8,0.9)_100%)] mix-blend-multiply" />
-        {/* golden vertical tone */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#2a4022]/25 via-[#0a0d0b]/70 to-[#0a0d0b]/95" />
-        {/* vignette edge darkening */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0)_45%,rgba(0,0,0,0.85)_100%)]" />
-      </motion.div>
+        {/* green/gold wash */}
+        <div
+          className={`
+            absolute inset-0
+            bg-[radial-gradient(60%_50%_at_50%_25%,rgba(17,44,33,0.28)_0%,rgba(8,14,12,0)_55%)]
+            mix-blend-multiply
+            pointer-events-none
+          `}
+        />
+        {/* vertical fade */}
+        <div
+          className={`
+            absolute inset-0
+            bg-gradient-to-b from-black/15 via-transparent to-black/35
+            pointer-events-none
+          `}
+        />
+        {/* vignette */}
+        <div
+          className={`
+            absolute inset-0
+            bg-[radial-gradient(circle_at_center,rgba(0,0,0,0)_60%,rgba(0,0,0,0.45)_100%)]
+            pointer-events-none
+          `}
+        />
+      </div>
 
-      {/* ===== FLOATING BUBBLES + CONTENT ===== */}
-      <FixedFloaters
-        items={FLOATERS}
-        safeArea={{ x: 22, y: 14, w: 56, h: 64 }}
-        edgePadding={18}
-        zIndex={1}
-      >
+      {/* ===== FLOATERS + CONTENT ===== */}
+      <FixedFloaters items={FLOATERS} safeArea={{ x: 22, y: 14, w: 56, h: 64 }} edgePadding={18} zIndex={1}>
         <div className="relative z-10 mx-auto max-w-7xl min-h-[100svh] grid grid-cols-1 md:grid-cols-2 items-center">
           {/* LEFT: HELLO + AnimatedText */}
           <div className="flex items-center justify-center p-6 md:p-8">
@@ -71,7 +85,10 @@ const Hero: React.FC = () => {
                 >
                   HELLO
                 </motion.h1>
-                <span className="absolute inset-[-12px] rounded-md border border-white/30 md:inset-[-16px]" aria-hidden />
+                <span
+                  className="absolute inset-[-12px] rounded-md border border-white/30 md:inset-[-16px]"
+                  aria-hidden
+                />
               </div>
 
               <div className="mt-6 md:mt-8">
@@ -90,12 +107,7 @@ const Hero: React.FC = () => {
           <div className="flex items-center justify-center p-6 md:p-8">
             <div
               className={`relative rounded-full flex items-center justify-center overflow-hidden ${colors.surface} border-4 shadow-[0_0_60px_rgba(255,122,26,.15)]`}
-              style={{
-                width: "90%",
-                maxWidth: "620px",
-                aspectRatio: "1 / 1",
-                borderColor: colors.brand,
-              }}
+              style={{ width: "90%", maxWidth: "620px", aspectRatio: "1 / 1", borderColor: colors.brand }}
             >
               {!prefersReduced && <LogoOrbitRing />}
               <Image
@@ -111,25 +123,25 @@ const Hero: React.FC = () => {
         </div>
       </FixedFloaters>
 
-      {/* ===== Bottom Buttons ===== */}
+      {/* Bottom CTAs */}
       <div className="absolute left-0 right-0 bottom-4 px-4 pb-[env(safe-area-inset-bottom)] md:bottom-8 md:px-0 flex justify-center z-20">
         <div className="w-full max-w-md flex flex-col gap-3 md:max-w-none md:w-auto md:flex-row md:gap-4">
           <a
             href="/events"
-            className="relative font-semibold rounded-2xl shadow-lg transition bg-[#ff7a1a] text-black w-full py-4 text-base md:w-auto md:px-7 md:py-3.5 md:text-sm hover:translate-y-[-1px] hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#ff7a1a]/35 will-change-transform transform-gpu btn-pulse text-center"
+            className="relative font-semibold rounded-2xl shadow-lg transition bg-[#ff7a1a] text-black w-full py-4 text-base md:w-auto md:px-7 md:py-3.5 md:text-sm hover:translate-y-[-1px] hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#ff7a1a]/35 transform-gpu btn-pulse text-center"
           >
             Events
           </a>
           <a
             href="https://www.activateuts.com.au/clubs/bangladeshi-society"
-            className="relative font-semibold rounded-2xl transition border border-[#ff7a1a] text-[#ff7a1a] bg-white/0 w-full py-4 text-base md:w-auto md:px-7 md:py-3.5 md:text-sm hover:bg-[#ff7a1a] hover:text-black hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#ff7a1a]/35 will-change-transform transform-gpu text-center"
+            className="relative font-semibold rounded-2xl transition border border-[#ff7a1a] text-[#ff7a1a] bg-white/0 w-full py-4 text-base md:w-auto md:px-7 md:py-3.5 md:text-sm hover:bg-[#ff7a1a] hover:text-black hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#ff7a1a]/35 transform-gpu text-center"
           >
             Membership
           </a>
         </div>
       </div>
 
-      {/* ===== Global styles ===== */}
+      {/* Global styles */}
       <style jsx global>{`
         .shimmer-text {
           color: transparent;
@@ -163,7 +175,6 @@ const Hero: React.FC = () => {
   );
 };
 
-/* ===== AnimatedText ===== */
 const ONE_SECOND = 1000;
 const WAIT_TIME = ONE_SECOND * 3;
 
@@ -173,13 +184,7 @@ const AnimatedText: React.FC<{
   fontSizeClasses?: string;
   lineWidthClass?: string;
   heightClass?: string;
-}> = ({
-  phrases,
-  disableAnimation = false,
-  fontSizeClasses = "text-3xl md:text-5xl lg:text-6xl",
-  lineWidthClass = "w-24",
-  heightClass = "h-16 md:h-20",
-}) => {
+}> = ({ phrases, disableAnimation = false, fontSizeClasses = "text-3xl md:text-5xl lg:text-6xl", lineWidthClass = "w-24", heightClass = "h-16 md:h-20" }) => {
   const [active, setActive] = useState(0);
   useEffect(() => {
     if (disableAnimation) return;
@@ -199,19 +204,12 @@ const AnimatedText: React.FC<{
             key={phrase}
             initial={false}
             animate={isActive ? "active" : "inactive"}
-            variants={{
-              active: { opacity: 1, y: 0, scale: 1 },
-              inactive: { opacity: 0, y: 16, scale: 0.98 },
-            }}
+            variants={{ active: { opacity: 1, y: 0, scale: 1 }, inactive: { opacity: 0, y: 16, scale: 0.98 } }}
             transition={{ duration: 0.35, ease: "easeOut" }}
-            className={[
-              "absolute font-bold",
-              fontSizeClasses,
-              "drop-shadow-[0_2px_12px_rgba(0,0,0,.45)] tracking-tight text-[#ff7a1a]",
-            ].join(" ")}
+            className={["absolute font-bold", fontSizeClasses, "drop-shadow-[0_2px_12px_rgba(0,0,0,.45)] tracking-tight text-[#ff7a1a]"].join(" ")}
           >
             {phrase.toUpperCase()}
-            <span className={`block h-1 mt-3 rounded-full ${lineWidthClass} bg-[#ff7a1a]/80`} />
+            <span className={["block h-1 mt-3 rounded-full", lineWidthClass, "bg-[#ff7a1a]/80"].join(" ")} />
           </motion.div>
         );
       })}
@@ -219,7 +217,6 @@ const AnimatedText: React.FC<{
   );
 };
 
-/* ===== Logo Orbit Ring ===== */
 const LogoOrbitRing: React.FC = () => (
   <svg className="absolute inset-0" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden>
     <defs>
@@ -229,16 +226,7 @@ const LogoOrbitRing: React.FC = () => (
       </linearGradient>
     </defs>
     <circle cx="50" cy="50" r="44" className={colors.ringDim} strokeWidth="1.5" fill="none" />
-    <circle
-      cx="50"
-      cy="50"
-      r="44"
-      stroke="url(#ringGrad)"
-      strokeWidth="3"
-      strokeLinecap="round"
-      fill="none"
-      strokeDasharray="60 260"
-    >
+    <circle cx="50" cy="50" r="44" stroke="url(#ringGrad)" strokeWidth="3" strokeLinecap="round" fill="none" strokeDasharray="60 260">
       <animate attributeName="stroke-dashoffset" values="0;320" dur="8s" repeatCount="indefinite" />
     </circle>
   </svg>
