@@ -17,48 +17,77 @@ export default function GalleryPreview({ seamlessTop = true }: { seamlessTop?: b
   return (
     <section
       aria-labelledby="gallery-heading"
-      className="relative bg-gradient-to-br from-[#0b0f14] via-[#0d131b] to-[#101820]"
+      className="relative text-white bg-[#f57c00] overflow-hidden"
     >
-      {/* optional top accent when not stacked under same-bg section */}
-      {!seamlessTop && (
-        <div className="h-[2px] w-full bg-gradient-to-r from-[#ff7a1a]/70 via-[#ffa45c]/60 to-transparent" />
+      {/* Top accent line (matches AboutSection) */}
+      {seamlessTop ? (
+        <div
+          aria-hidden
+          className="pointer-events-none mx-auto h-8 max-w-7xl rounded-full opacity-50"
+          style={{
+            background:
+              "radial-gradient(60% 100% at 50% 0%, rgba(255,140,51,0.35) 0%, rgba(255,140,51,0) 70%)",
+          }}
+        />
+      ) : (
+        <div className="h-[2px] w-full bg-gradient-to-r from-[#ffd19a]/60 via-white/30 to-transparent" />
       )}
-      {/* soft bridge when seamless */}
-      {seamlessTop && <div className="h-8 bg-gradient-to-b from-transparent to-black/5" aria-hidden />}
 
-      <div className="mx-auto max-w-7xl px-4 py-14">
+      {/* Subtle dot texture overlay (matches AboutSection) */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-15"
+        style={{
+          backgroundImage: "radial-gradient(rgba(255,255,255,0.3) 1px, transparent 1px)",
+          backgroundSize: "10px 10px",
+        }}
+      />
+
+      <div className="relative mx-auto max-w-7xl px-4 py-14">
         <header className="mb-8 text-center">
-          <h2 id="gallery-heading" className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#C9D1D9]">
+          <h2
+            id="gallery-heading"
+            className="text-3xl md:text-4xl font-extrabold tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
+          >
             Gallery
           </h2>
-          <p className="mt-2 text-sm text-[#9aa4af]">
+          <p className="mt-2 text-sm text-white/90">
             Moments from recent events — see the full collection in our gallery.
           </p>
         </header>
 
         {/* Grid: 3 up top; second row center spans 2 cols */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {SHOTS.slice(0, 3).map((s, i) => <Tile key={`row1-${i}`} shot={s} />)}
+        <div className="relative grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {SHOTS.slice(0, 3).map((s, i) => (
+            <Tile key={`row1-${i}`} shot={s} />
+          ))}
+
           <Tile shot={SHOTS[3]} />
-          <div className="lg:col-span-2"><Tile shot={SHOTS[4]} tall /></div>
+          <div className="lg:col-span-2">
+            <Tile shot={SHOTS[4]} tall />
+          </div>
           <Tile shot={SHOTS[5]} />
         </div>
 
+        {/* Buttons (match AboutSection button styling) */}
         <div className="mt-10 flex justify-center">
           <Link
             href="/gallery"
-            className="rounded-full border border-[#ff7a1a] px-6 py-3 text-sm font-semibold text-[#ff7a1a] transition hover:bg-[#ff7a1a] hover:text-black"
+            className="rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#f57c00] shadow-[0_8px_30px_rgba(0,0,0,0.25)] transition hover:-translate-y-px hover:shadow-[0_10px_34px_rgba(0,0,0,0.28)]"
           >
             View All
           </Link>
         </div>
       </div>
 
-      {/* bottom subtle glow */}
+      {/* Bottom: universal orange transition fade (same as AboutSection) */}
       <div
         aria-hidden
-        className="pointer-events-none mx-auto mb-2 h-6 max-w-7xl rounded-full opacity-40"
-        style={{ background: "radial-gradient(60% 100% at 50% 0%, rgba(255,122,26,0.14) 0%, rgba(255,122,26,0) 70%)" }}
+        className="pointer-events-none mx-auto mb-2 h-8 max-w-7xl rounded-full opacity-50"
+        style={{
+          background:
+            "radial-gradient(60% 100% at 50% 0%, rgba(255,140,51,0.35) 0%, rgba(255,140,51,0) 70%)",
+        }}
       />
     </section>
   );
@@ -68,15 +97,15 @@ function Tile({ shot, tall = false }: { shot: Shot; tall?: boolean }) {
   return (
     <article
       className={[
-        "group relative overflow-hidden rounded-2xl border border-[#2a2f36] bg-[#151a20]",
-        "shadow-[0_10px_30px_rgba(0,0,0,0.35)] transition-transform hover:-translate-y-0.5",
+        "group relative overflow-hidden rounded-2xl border border-white/25 bg-white/10 backdrop-blur-[2px]",
+        "shadow-[0_0_24px_rgba(0,0,0,0.18)] transition-transform hover:-translate-y-0.5",
         tall ? "aspect-[16/9]" : "aspect-[16/10]",
       ].join(" ")}
     >
-      {/* subtle brand glow */}
+      {/* gentle glow + ring tuned for orange bg (matching card treatment) */}
       <div className="pointer-events-none absolute inset-0 rounded-2xl">
-        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#ff7a1a]/5 via-[#ffa45c]/4 to-transparent opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />
-        <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-[#2f353d]" />
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/12 via-transparent to-white/10 opacity-0 blur-lg transition-opacity duration-500 group-hover:opacity-100" />
+        <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/18" />
       </div>
 
       <div className="relative h-full w-full">
@@ -91,8 +120,8 @@ function Tile({ shot, tall = false }: { shot: Shot; tall?: boolean }) {
 
       {/* hover caption */}
       <div className="pointer-events-none absolute inset-0 flex items-end p-4">
-        <div className="w-full rounded-xl bg-black/0 p-3 opacity-0 backdrop-blur-0 transition-all duration-300 group-hover:bg-black/35 group-hover:opacity-100 group-hover:backdrop-blur-sm">
-          <p className="text-sm font-medium text-white/95">{shot.alt}</p>
+        <div className="w-full rounded-xl bg-white/0 p-3 opacity-0 backdrop-blur-0 transition-all duration-300 group-hover:bg-white/15 group-hover:opacity-100 group-hover:backdrop-blur-sm">
+          <p className="text-sm font-medium text-white">{shot.alt}</p>
         </div>
       </div>
 

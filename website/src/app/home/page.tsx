@@ -17,7 +17,7 @@ export default function Home() {
       title: "Games Night – Trimester 3",
       tags: ["Games", "Social"],
       description:
-        "Join us for a night of board games, card games, and video games! Meet new friends and unwind before mid‑semester.",
+        "Join us for a night of board games, card games, and video games! Meet new friends and unwind before mid-semester.",
       imageUrl: "/games-night-t3-2025.webp",
       startISO: "2025-09-20T18:00:00+10:00",
       endISO: "2025-09-20T22:00:00+10:00",
@@ -125,9 +125,19 @@ export default function Home() {
       <AboutSection />
 
       {/* Events section fills viewport and grows */}
-      <section className="min-h-screen bg-gradient-to-br from-[#0b0f14] via-[#0d131b] to-[#101820] py-10">
-        <div className="mx-auto max-w-screen-2xl px-4 md:px-8">
-          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#C9D1D9] text-center mb-8">
+      <section className="relative min-h-screen bg-[linear-gradient(135deg,#f57c00_0%,#d96812_100%)] text-white py-10">
+        {/* subtle texture */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-20"
+          style={{
+            backgroundImage:
+              "radial-gradient(rgba(255,255,255,0.28) 1px, transparent 1px)",
+            backgroundSize: "10px 10px",
+          }}
+        />
+        <div className="relative mx-auto max-w-screen-2xl px-4 md:px-8">
+          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white text-center mb-8">
             Upcoming Events
           </h2>
 
@@ -150,15 +160,17 @@ export default function Home() {
             <div className="mt-8 flex justify-center">
               <button
                 onClick={() => setVisibleCount(c => Math.min(c + 2, ordered.length))}
-                className={[
-                  "inline-flex items-center rounded-full",
-                  "border border-[#ff7a1a]/60 px-5 py-2.5 text-sm font-semibold text-[#ffa45c]",
-                  "transition-all hover:shadow-[0_0_24px_rgba(255,122,26,0.35)] hover:text-black",
-                  "hover:bg-gradient-to-r hover:from-[#ff7a1a] hover:to-[#ffa45c]",
-                ].join(" ")}
+                className="inline-flex items-center rounded-full bg-[#0d131b] text-white px-5 py-2.5 text-sm font-semibold transition-all hover:brightness-110 hover:shadow-[0_0_24px_rgba(0,0,0,0.45)]"
               >
                 View more
-                <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="ml-2 h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
               </button>

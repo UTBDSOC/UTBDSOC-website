@@ -12,7 +12,8 @@ import {
   FaLinkedinIn,
 } from "react-icons/fa";
 
-const links = [
+/* -------------------------------- config ------------------------------- */
+const NAV_LINKS = [
   { href: "/home", label: "Home" },
   { href: "/about-us", label: "About Us" },
   { href: "/events", label: "Events" },
@@ -22,7 +23,7 @@ const links = [
   { href: "/gallery", label: "Gallery" },
 ];
 
-const socials = [
+const SOCIALS = [
   { href: "https://discord.gg/wQupZgkK", icon: FaDiscord, label: "Discord" },
   { href: "https://github.com/UTBDSOC", icon: FaGithub, label: "GitHub" },
   { href: "https://youtube.com/@utsbdsoc", icon: FaYoutube, label: "YouTube" },
@@ -31,149 +32,148 @@ const socials = [
   { href: "https://www.linkedin.com/company/uts-bangladeshi-society", icon: FaLinkedinIn, label: "LinkedIn" },
 ];
 
-const Navbar: React.FC = () => {
+/* -------------------------------- navbar ------------------------------- */
+export default function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
+  useEffect(() => setOpen(false), [pathname]);
+
+  // Add scroll detection to trigger glass effect
   useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
+    const handleScroll = () => setScrolled(window.scrollY > window.innerHeight * 0.6);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <header
       className={[
-        "fixed top-0 left-0 w-full z-[9999]", // sit above everything
-        "supports-[backdrop-filter]:bg-black/10", // subtle tint
+        "fixed top-0 left-0 z-[9999] w-full transition-all duration-500 ease-in-out",
+        scrolled
+          ? // after first section → glass effect
+            "bg-white/10 backdrop-blur-[10px] shadow-[0_2px_20px_rgba(0,0,0,0.25)]"
+          : // before scroll → transparent
+            "bg-transparent backdrop-blur-0 shadow-none",
       ].join(" ")}
     >
-      {/* slim accent bar */}
-      <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-orange-500/40 to-transparent" />
-
-      {/* Nav bar container (gets a tiny blur on hover) */}
-      <div className="transition">
-        <div className="mx-auto max-w-7xl px-4">
-          <nav
-            className={[
-              "flex h-20 items-center gap-4",
-              "supports-[backdrop-filter]:backdrop-blur-0 hover:supports-[backdrop-filter]:backdrop-blur-[2px]",
-              "border-b border-transparent hover:border-orange-500/10",
-            ].join(" ")}
+      <div className="mx-auto max-w-7xl px-4">
+        <nav className="flex h-16 md:h-20 items-center gap-4">
+          {/* brand */}
+          <Link
+            href="/"
+            className="flex-shrink-0 text-2xl md:text-3xl font-extrabold tracking-tight text-white drop-shadow-[0_2px_3px_rgba(0,0,0,0.4)] hover:text-[#ffd9a3] transition"
+            aria-label="UTSBDSOC Home"
           >
-            {/* Branding (left) */}
-            <Link
-              href="/"
-              className="flex-shrink-0 font-extrabold text-2xl md:text-3xl tracking-tight text-orange-400 hover:text-orange-300 transition"
-            >
-              UTSBDSOC
-            </Link>
+            UTSBDSOC
+          </Link>
 
-            {/* Push everything else to the right */}
-            <div className="ml-auto hidden md:flex items-center gap-6">
-              {/* Desktop links (right-aligned) */}
-              <ul className="flex items-center gap-2 font-medium text-lg">
-                {links.map(({ href, label }) => {
-                  const active =
-                    href === "/" ? pathname === "/" : pathname.startsWith(href);
-                  return (
-                    <li key={href}>
-                      <Link
-                        href={href}
-                        className={[
-                          "relative nav-underline rounded-md",
-                          "px-2 py-1 -mx-2 -my-1",
-                          "transition",
-                          // tiny glass hover
-                          "hover:bg-white/5 hover:supports-[backdrop-filter]:backdrop-blur-[2px]",
-                          active
-                            ? "text-orange-300"
-                            : "text-orange-200/80 hover:text-orange-200",
-                        ].join(" ")}
-                      >
-                        {label}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
+          {/* desktop links */}
+          <div className="ml-auto hidden md:flex items-center gap-6">
+            <ul className="flex items-center gap-2 text-lg font-medium">
+              {NAV_LINKS.map(({ href, label }) => {
+                const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+                return (
+                  <li key={href}>
+                    <Link
+                      href={href}
+                      className={[
+                        "relative nav-underline rounded-full px-3 py-1 transition",
+                        "text-white/95 hover:text-white",
+                        "hover:bg-white/10 hover:shadow-[0_0_10px_rgba(255,140,51,0.25)]",
+                        active
+                          ? "text-white bg-white/10 shadow-[0_0_12px_rgba(255,140,51,0.3)]"
+                          : "",
+                      ].join(" ")}
+                    >
+                      {label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
 
-              {/* Divider */}
-              <span className="h-6 w-px bg-orange-500/20" />
-
-              {/* Socials (far right) */}
-              <div className="flex items-center gap-3">
-                {socials.map(({ href, icon: Icon, label }) => (
-                  <Link
-                    key={label}
-                    href={href}
-                    aria-label={label}
-                    className="rounded-md p-1 text-orange-300/90 hover:text-orange-200 hover:bg-white/5 hover:supports-[backdrop-filter]:backdrop-blur-[2px] transition"
-                  >
-                    <Icon size={20} />
-                  </Link>
-                ))}
-                <Link
-                  href="https://www.activateuts.com.au/clubs/bangladeshi-society"
-                  className="ml-1 rounded-full bg-orange-500 px-4 py-2.5 font-semibold text-black shadow hover:bg-orange-400 transition will-change-transform transform-gpu hover:-translate-y-0.5"
+            {/* socials */}
+            <div className="ml-2 flex items-center gap-3">
+              {SOCIALS.map(({ href, icon: Icon, label }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="rounded-md p-1 text-white/90 hover:text-[#ffb066] hover:drop-shadow-[0_0_10px_rgba(255,140,51,0.4)] transition"
                 >
-                  Membership
-                </Link>
-              </div>
-            </div>
+                  <Icon size={20} />
+                </a>
+              ))}
 
-            {/* Mobile: hamburger */}
-            <button
-              aria-label="Open menu"
-              aria-expanded={open}
-              onClick={() => setOpen((s) => !s)}
-              className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-orange-300 hover:text-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-300"
-            >
-              <span className="sr-only">Open menu</span>
-              <div className="space-y-1.5">
-                <span
-                  className={[
-                    "block h-0.5 w-6 bg-orange-300 transition",
-                    open ? "translate-y-2 rotate-45" : "",
-                  ].join(" ")}
-                />
-                <span
-                  className={[
-                    "block h-0.5 w-6 bg-orange-300 transition",
-                    open ? "opacity-0" : "",
-                  ].join(" ")}
-                />
-                <span
-                  className={[
-                    "block h-0.5 w-6 bg-orange-300 transition",
-                    open ? "-translate-y-2 -rotate-45" : "",
-                  ].join(" ")}
-                />
-              </div>
-            </button>
-          </nav>
-        </div>
+              {/* Membership */}
+              <a
+                href="https://www.activateuts.com.au/clubs/bangladeshi-society"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-1 rounded-full bg-white px-4 py-2.5 font-semibold text-[#f57c00] shadow-md hover:bg-[#fff5d9] hover:scale-[1.03] transition-transform"
+              >
+                Membership
+              </a>
+            </div>
+          </div>
+
+          {/* mobile burger */}
+          <button
+            aria-label="Open menu"
+            aria-expanded={open}
+            onClick={() => setOpen((s) => !s)}
+            className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-white hover:text-[#ffb066] focus:outline-none focus:ring-2 focus:ring-white/60"
+          >
+            <div className="space-y-1.5">
+              <span
+                className={[
+                  "block h-0.5 w-6 bg-white transition",
+                  open ? "translate-y-2 rotate-45" : "",
+                ].join(" ")}
+              />
+              <span
+                className={[
+                  "block h-0.5 w-6 bg-white transition",
+                  open ? "opacity-0" : "",
+                ].join(" ")}
+              />
+              <span
+                className={[
+                  "block h-0.5 w-6 bg-white transition",
+                  open ? "-translate-y-2 -rotate-45" : "",
+                ].join(" ")}
+              />
+            </div>
+          </button>
+        </nav>
       </div>
 
-      {/* Mobile drawer */}
+      {/* mobile drawer */}
       <div
         className={[
-          "md:hidden fixed inset-x-0 top-20 z-[9999] origin-top bg-[#1b1b1b]/95 border-t border-orange-500/20",
-          "transition-transform duration-200 will-change-transform transform-gpu",
+          "md:hidden fixed inset-x-0 top-16 md:top-20 z-[9999] origin-top",
+          "bg-[linear-gradient(135deg,#ff8c33_0%,#f57c00_100%)]",
+          "transition-transform duration-300 will-change-transform",
           open ? "translate-y-0" : "-translate-y-[120%]",
         ].join(" ")}
       >
         <div className="mx-auto max-w-7xl px-4 py-6">
-          <ul className="space-y-4 text-orange-200/90 text-lg font-medium">
-            {links.map(({ href, label }) => {
-              const active =
-                href === "/" ? pathname === "/" : pathname.startsWith(href);
+          <ul className="space-y-4 text-white/95 text-lg font-medium">
+            {NAV_LINKS.map(({ href, label }) => {
+              const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
               return (
                 <li key={href}>
                   <Link
                     href={href}
                     className={[
-                      "block py-2 rounded-md",
-                      "hover:bg-white/5 hover:supports-[backdrop-filter]:backdrop-blur-[2px]",
-                      active ? "text-orange-300" : "hover:text-orange-200",
+                      "block rounded-full px-3 py-2 transition",
+                      "hover:bg-white/15 hover:shadow-[0_0_10px_rgba(255,140,51,0.35)]",
+                      active ? "bg-white/20 shadow-[0_0_12px_rgba(255,140,51,0.4)]" : "",
                     ].join(" ")}
                   >
                     {label}
@@ -184,24 +184,28 @@ const Navbar: React.FC = () => {
           </ul>
 
           <div className="mt-6 flex items-center gap-4">
-            {socials.map(({ href, icon: Icon, label }) => (
-              <Link
+            {SOCIALS.map(({ href, icon: Icon, label }) => (
+              <a
                 key={label}
                 href={href}
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label={label}
-                className="rounded-md p-1 text-orange-300/90 hover:text-orange-200 hover:bg-white/5 hover:supports-[backdrop-filter]:backdrop-blur-[2px] transition"
+                className="rounded-md p-1 text-white/95 transition hover:text-[#ffb066]"
               >
                 <Icon size={22} />
-              </Link>
+              </a>
             ))}
           </div>
 
-          <Link
-            href="/membership"
-            className="mt-6 inline-flex rounded-full bg-orange-500 px-5 py-3 font-semibold text-black shadow hover:bg-orange-400 transition"
+          <a
+            href="https://www.activateuts.com.au/clubs/bangladeshi-society"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-6 inline-flex rounded-full bg-white px-5 py-3 font-semibold text-[#f57c00] shadow-md hover:bg-[#fff5d9] hover:scale-[1.03] transition-transform"
           >
             Membership
-          </Link>
+          </a>
         </div>
       </div>
 
@@ -210,24 +214,26 @@ const Navbar: React.FC = () => {
         .nav-underline::after {
           content: "";
           position: absolute;
-          left: 0;
+          left: 12px;
+          right: 12px;
           bottom: -6px;
           height: 2px;
           width: 0%;
+          margin: 0 auto;
           background: linear-gradient(
             90deg,
-            rgba(255, 140, 0, 1) 0%,
-            rgba(255, 140, 0, 0.2) 100%
+            rgba(255, 140, 51, 1) 0%,
+            rgba(255, 210, 154, 0.8) 50%,
+            rgba(255, 140, 51, 1) 100%
           );
-          transition: width 200ms ease;
+          box-shadow: 0 0 10px rgba(255, 140, 51, 0.45);
+          transition: width 220ms ease;
         }
         .nav-underline:hover::after,
         .nav-underline:focus::after {
-          width: 100%;
+          width: calc(100% - 24px);
         }
       `}</style>
     </header>
   );
-};
-
-export default Navbar;
+}

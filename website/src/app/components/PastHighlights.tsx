@@ -5,41 +5,38 @@ import Link from "next/link";
 type Highlight = {
   title: string;
   date: string;
-  stats?: string;          // e.g., "220+ attendees"
-  href: string;            // link to gallery / recap
-  image: string;           // /public path
-  tags?: string[];         // e.g., ["Cultural", "Music"]
+  stats?: string;
+  href: string;
+  image: string;
+  tags?: string[];
 };
 
 const HIGHLIGHTS: Highlight[] = [
   {
-    title: "Pohela Boishakh 2024",
-    date: "20 Apr 2024",
-    stats: "300+ attendees",
-    href: "/gallery/pohela-boishakh-2024",
-    image: "/pohela-boishakh-celebration.png",
-    tags: ["Cultural", "Food", "Dance"],
+    title: "Karaoke Night",
+    date: "24 Sept 2025",
+    href: "https://www.instagram.com/p/DOuXWM1gerY/", // IG link
+    image: "/events/karaoke-night-2025.jpg", // replace with actual file path
+    tags: ["Social", "Music", "Dance"],
   },
   {
-    title: "Games Night – Trimester 1",
-    date: "15 Mar 2025",
-    stats: "120+ attendees",
-    href: "/gallery/games-night-t1-2025",
-    image: "/IMG_3697-1024x683.jpg.webp",
-    tags: ["Social", "Networking"],
+    title: "Movie Night – Utshob",
+    date: "5 Sept 2025",
+    href: "https://www.instagram.com/p/DOlKgJnDyRB/",
+    image: "/events/movie-night-utshob-2025.jpg",
+    tags: ["Film", "Cultural", "Community"],
   },
   {
-    title: "Shondartara 2023",
-    date: "28 Sep 2023",
-    stats: "Sold Out",
-    href: "/gallery/shondartara-2023",
-    image: "/Photography-By_Md-Jahangir_0058-1024x681.jpg.webp",
-    tags: ["Music", "Dance"],
+    title: "Boishakhi Potluck",
+    date: "14 Apr 2025",
+    href: "https://www.instagram.com/p/DlSzYBrZfxv/",
+    image: "/events/boishakhi-potluck-2025.jpg",
+    tags: ["Cultural", "Food", "Festival"],
   },
 ];
 
 const Chip: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <span className="inline-flex items-center rounded-full border border-[#2f353d] bg-[#121821] px-2.5 py-1 text-[11px] font-medium text-[#8B949E]">
+  <span className="inline-flex items-center rounded-full border border-white/25 bg-white/10 px-2.5 py-1 text-[11px] font-medium text-white/90">
     {children}
   </span>
 );
@@ -47,22 +44,36 @@ const Chip: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 export default function PastHighlights() {
   return (
     <section
-      className="relative border-t border-[#2a2f36] bg-gradient-to-br from-[#0b0f14] via-[#0d131b] to-[#101820]"
+      className="relative overflow-hidden bg-[#f57c00] text-white"
       aria-labelledby="past-highlights"
     >
       {/* top accent */}
-      <div className="h-[2px] w-full bg-gradient-to-r from-[#ff7a1a]/70 via-[#ffa45c]/60 to-transparent" />
+      <div className="h-[2px] w-full bg-gradient-to-r from-[#ffd19a]/60 via-white/30 to-transparent" />
 
-      <div className="mx-auto max-w-7xl px-4 py-12 md:py-16">
+      {/* subtle dot texture */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-15"
+        style={{
+          backgroundImage:
+            "radial-gradient(rgba(255,255,255,0.3) 1px, transparent 1px)",
+          backgroundSize: "10px 10px",
+        }}
+      />
+
+      <div className="relative mx-auto max-w-7xl px-4 py-12 md:py-16">
         <div className="mb-8 flex items-end justify-between gap-4">
-          <h2 id="past-highlights" className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#C9D1D9]">
+          <h2
+            id="past-highlights"
+            className="text-3xl md:text-4xl font-extrabold tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
+          >
             Past Event Highlights
           </h2>
           <Link
-            href="/gallery"
-            className="rounded-full border border-[#ff7a1a] px-4 py-2 text-sm font-semibold text-[#ff7a1a] hover:bg-[#ff7a1a] hover:text-black transition"
+            href="https://www.instagram.com/utsbdsoc"
+            className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#f57c00] shadow-[0_8px_30px_rgba(0,0,0,0.25)] transition hover:-translate-y-px hover:shadow-[0_10px_34px_rgba(0,0,0,0.28)]"
           >
-            View Full Gallery
+            View on Instagram
           </Link>
         </div>
 
@@ -70,12 +81,12 @@ export default function PastHighlights() {
           {HIGHLIGHTS.map((h, i) => (
             <article
               key={i}
-              className="group relative overflow-hidden rounded-2xl border border-[#2a2f36] bg-[#151a20] shadow-[0_10px_30px_rgba(0,0,0,0.35)] transition-transform hover:-translate-y-0.5"
+              className="group relative overflow-hidden rounded-2xl border border-white/25 bg-white/10 backdrop-blur-[2px] shadow-[0_0_24px_rgba(0,0,0,0.18)] transition-transform hover:-translate-y-0.5"
             >
-              {/* subtle glow */}
+              {/* glow + ring */}
               <div className="pointer-events-none absolute inset-0 rounded-2xl">
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#ff7a1a]/6 via-[#ffa45c]/5 to-transparent opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />
-                <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-[#2f353d]" />
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/12 via-transparent to-white/10 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />
+                <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/18" />
               </div>
 
               {/* image */}
@@ -92,22 +103,25 @@ export default function PastHighlights() {
               </div>
 
               {/* copy */}
-              <div className="relative z-10 p-5 space-y-3 text-[#C9D1D9]">
-                <h3 className="text-xl font-extrabold tracking-tight">{h.title}</h3>
-                <p className="text-sm text-[#9aa4af]">{h.date}{h.stats ? ` • ${h.stats}` : ""}</p>
+              <div className="relative z-10 space-y-3 p-5">
+                <h3 className="text-xl font-extrabold tracking-tight">
+                  {h.title}
+                </h3>
+                <p className="text-sm text-white/90">{h.date}</p>
 
-                {h.tags && h.tags.length > 0 && (
+                {h.tags?.length ? (
                   <div className="flex flex-wrap gap-2">
                     {h.tags.map((t, idx) => (
                       <Chip key={idx}>{t}</Chip>
                     ))}
                   </div>
-                )}
+                ) : null}
 
                 <div className="pt-1">
                   <Link
                     href={h.href}
-                    className="inline-flex items-center rounded-full border border-[#ff7a1a]/60 px-4 py-2 text-sm font-semibold text-[#ffa45c] hover:bg-[#ff7a1a] hover:text-black transition"
+                    target="_blank"
+                    className="inline-flex items-center rounded-full border border-white/70 bg-white/20 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white hover:text-[#f57c00]"
                   >
                     View Photos
                     <svg
@@ -128,16 +142,16 @@ export default function PastHighlights() {
         </div>
 
         {/* divider */}
-        <div className="mt-12 h-px w-full bg-gradient-to-r from-transparent via-[#2a2f36] to-transparent" />
+        <div className="mt-12 h-px w-full bg-gradient-to-r from-transparent via-white/25 to-transparent" />
       </div>
 
-      {/* bottom subtle glow */}
+      {/* bottom orange transition fade */}
       <div
         aria-hidden
-        className="pointer-events-none mx-auto mb-2 h-6 max-w-7xl rounded-full opacity-40"
+        className="pointer-events-none mx-auto mb-2 h-6 max-w-7xl rounded-full opacity-50"
         style={{
           background:
-            "radial-gradient(60% 100% at 50% 0%, rgba(255,122,26,0.18) 0%, rgba(255,122,26,0) 70%)",
+            "radial-gradient(60% 100% at 50% 0%, rgba(255,140,51,0.35) 0%, rgba(255,140,51,0) 70%)",
         }}
       />
     </section>
