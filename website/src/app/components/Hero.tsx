@@ -4,7 +4,6 @@
 import React, { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
-import FixedFloaters, { Floater } from "../components/FixedFloaters";
 
 const colors = {
   brand: "#ff7a1a",
@@ -14,17 +13,6 @@ const colors = {
 
 const Hero: React.FC = () => {
   const prefersReduced = useReducedMotion();
-
-  const FLOATERS: Floater[] = [
-    { id: "tl-1", size: 200, top: 6, left: 6, imageSrc: "/bubbles/image-1-1024x768.jpg.webp", ring: "rgba(255,164,92,0.35)", floatAmp: 10, floatDur: 8, floatDelay: 0.1 },
-    { id: "tl-2", size: 150, top: 14, left: 14, imageSrc: "/bubbles/IMG_0357-1-edited-1.jpeg.webp", ring: "rgba(255,122,26,0.35)", floatAmp: 10, floatDur: 8, floatDelay: 0.3 },
-    { id: "tr-1", size: 200, top: 8, right: 8, imageSrc: "/bubbles/IMG_3698-1024x683.jpg.webp", ring: "rgba(255,164,92,0.35)", floatAmp: 10, floatDur: 8, floatDelay: 0.25 },
-    { id: "tr-2", size: 150, top: 50, right: 14, imageSrc: "/bubbles/AR6_3535-1024x683.jpg.webp", ring: "rgba(255,164,92,0.35)", floatAmp: 10, floatDur: 8, floatDelay: 0.45 },
-    { id: "bl-1", size: 110, bottom: 10, left: 8, imageSrc: "/bubbles/IMG_0880-1024x681.jpg.webp", ring: "rgba(255,164,92,0.35)", floatAmp: 10, floatDur: 8, floatDelay: 0.5 },
-    { id: "bl-2", size: 110, bottom: 18, left: 14, imageSrc: "/bubbles/Photography-By_Md-Jahangir_0071-1024x681.jpg.webp", ring: "rgba(255,122,26,0.35)", floatAmp: 10, floatDur: 8, floatDelay: 0.7 },
-    { id: "br-1", size: 220, bottom: 8, right: 10, imageSrc: "/bubbles/IMG_1867-e1722353135831-1024x652.jpg.webp", ring: "rgba(255,164,92,0.35)", floatAmp: 10, floatDur: 8, floatDelay: 0.65 },
-    { id: "br-2", size: 110, bottom: 16, right: 16, imageSrc: "/bubbles/Photography-By_Md-Jahangir_0155-1024x681.jpg.webp", ring: "rgba(255,122,26,0.35)", floatAmp: 10, floatDur: 8, floatDelay: 0.85 },
-  ];
 
   return (
     <div className="relative min-h-[100svh] overflow-hidden text-neutral-200">
@@ -70,58 +58,52 @@ const Hero: React.FC = () => {
         />
       </div>
 
-      {/* ===== FLOATERS + CONTENT ===== */}
-      <FixedFloaters items={FLOATERS} safeArea={{ x: 22, y: 14, w: 56, h: 64 }} edgePadding={18} zIndex={1}>
-        <div className="relative z-10 mx-auto max-w-7xl min-h-[100svh] grid grid-cols-1 md:grid-cols-2 items-center">
-          {/* LEFT: HELLO + AnimatedText */}
-          <div className="flex items-center justify-center p-6 md:p-8">
-            <div className="w-full max-w-3xl">
-              <div className="relative inline-block">
-                <motion.h1
-                  initial={{ opacity: 0, x: -40 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.7, ease: "easeOut" }}
-                  className="font-extrabold leading-none text-7xl md:text-[8rem] lg:text-[10rem] tracking-tight shimmer-text"
-                >
-                  HELLO
-                </motion.h1>
-                <span
-                  className="absolute inset-[-12px] rounded-md border border-white/30 md:inset-[-16px]"
-                  aria-hidden
-                />
-              </div>
-
-              <div className="mt-6 md:mt-8">
-                <AnimatedText
-                  phrases={["Students", "Alumni", "Staff", "Public"]}
-                  disableAnimation={prefersReduced ?? false}
-                  fontSizeClasses="text-4xl md:text-6xl lg:text-7xl"
-                  lineWidthClass="w-28 md:w-36 lg:w-44"
-                  heightClass="h-[4.5rem] md:h-[6rem] lg:h-[7rem]"
-                />
-              </div>
+      {/* ===== CONTENT (floaters removed) ===== */}
+      <div className="relative z-10 mx-auto max-w-7xl min-h-[100svh] grid grid-cols-1 md:grid-cols-2 items-center">
+        {/* LEFT: HELLO + AnimatedText */}
+        <div className="flex items-center justify-center p-6 md:p-8">
+          <div className="w-full max-w-3xl">
+            <div className="relative inline-block">
+              <motion.h1
+                initial={{ opacity: 0, x: -40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.7, ease: "easeOut" }}
+                className="font-extrabold leading-none text-7xl md:text-[8rem] lg:text-[10rem] tracking-tight shimmer-text"
+              >
+                HELLO
+              </motion.h1>
             </div>
-          </div>
 
-          {/* RIGHT: Circular Logo */}
-          <div className="flex items-center justify-center p-6 md:p-8">
-            <div
-              className={`relative rounded-full flex items-center justify-center overflow-hidden ${colors.surface} border-4 shadow-[0_0_60px_rgba(255,122,26,.15)]`}
-              style={{ width: "90%", maxWidth: "620px", aspectRatio: "1 / 1", borderColor: colors.brand }}
-            >
-              {!prefersReduced && <LogoOrbitRing />}
-              <Image
-                src="/BDSOC-logo_transparent-2-1.png.webp"
-                alt="UTSBDSOC Logo"
-                width={800}
-                height={800}
-                priority
-                className="object-contain p-6"
+            <div className="mt-6 md:mt-8">
+              <AnimatedText
+                phrases={["Students", "Alumni", "Staff", "Public"]}
+                disableAnimation={prefersReduced ?? false}
+                fontSizeClasses="text-4xl md:text-6xl lg:text-7xl"
+                lineWidthClass="w-28 md:w-36 lg:w-44"
+                heightClass="h-[4.5rem] md:h-[6rem] lg:h-[7rem]"
               />
             </div>
           </div>
         </div>
-      </FixedFloaters>
+
+        {/* RIGHT: Circular Logo */}
+        <div className="flex items-center justify-center p-6 md:p-8">
+          <div
+            className={`relative rounded-full flex items-center justify-center overflow-hidden ${colors.surface} border-4 shadow-[0_0_60px_rgba(255,122,26,.15)]`}
+            style={{ width: "90%", maxWidth: "620px", aspectRatio: "1 / 1", borderColor: colors.brand }}
+          >
+            {!prefersReduced && <LogoOrbitRing />}
+            <Image
+              src="/BDSOC-logo_transparent-2-1.png.webp"
+              alt="UTSBDSOC Logo"
+              width={800}
+              height={800}
+              priority
+              className="object-contain p-6"
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Bottom CTAs */}
       <div className="absolute left-0 right-0 bottom-4 px-4 pb-[env(safe-area-inset-bottom)] md:bottom-8 md:px-0 flex justify-center z-20">
@@ -206,10 +188,10 @@ const AnimatedText: React.FC<{
             animate={isActive ? "active" : "inactive"}
             variants={{ active: { opacity: 1, y: 0, scale: 1 }, inactive: { opacity: 0, y: 16, scale: 0.98 } }}
             transition={{ duration: 0.35, ease: "easeOut" }}
-            className={["absolute font-bold", fontSizeClasses, "drop-shadow-[0_2px_12px_rgba(0,0,0,.45)] tracking-tight text-[#ff7a1a]"].join(" ")}
+            className={["absolute font-bold", fontSizeClasses, "drop-shadow-[0_2px_12px_rgba(0,0,0,.45)] tracking-tight shimmer-text"].join(" ")}
           >
             {phrase.toUpperCase()}
-            <span className={["block h-1 mt-3 rounded-full", lineWidthClass, "bg-[#ff7a1a]/80"].join(" ")} />
+            <span className={["block h-1 mt-3 rounded-full", lineWidthClass, "bg-[#b2b874]/80"].join(" ")} />
           </motion.div>
         );
       })}

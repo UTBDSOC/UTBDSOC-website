@@ -121,66 +121,87 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <Hero />
-      <AboutSection />
+  <Hero />
+  {/* ABOUT now handles gradient internally when orange */}
+  <AboutSection variant="orange" />
 
-      {/* Events section fills viewport and grows */}
-      <section className="relative min-h-screen bg-[linear-gradient(135deg,#f57c00_0%,#d96812_100%)] text-white py-10">
-        {/* subtle texture */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-20"
-          style={{
-            backgroundImage:
-              "radial-gradient(rgba(255,255,255,0.28) 1px, transparent 1px)",
-            backgroundSize: "10px 10px",
-          }}
-        />
-        <div className="relative mx-auto max-w-screen-2xl px-4 md:px-8">
-          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white text-center mb-8">
-            Upcoming Events
-          </h2>
+{/* Events section fills viewport and grows */}
+<section
+  className="relative min-h-screen text-white py-12 md:py-16 overflow-hidden mt-[-1px]" // kill 1px seam
+  style={{
+    // Start DARK to match the bottom of About; keep a subtle depth gradient
+    background: "linear-gradient(180deg, #0b0f14 0%, #10161d 55%, #0b0f14 100%)",
+  }}
+>
+  {/* Soft orange glow that kisses the top edge (very subtle) */}
+  <div className="pointer-events-none absolute inset-x-0 -top-6 h-6 bg-gradient-to-b from-[#f57c00]/18 to-transparent" />
 
-          {/* Tight grid; wrapper div forces full width without changing EventCard props */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
-            {visible.map((ev) => (
-              <div key={`${ev.title}-${ev.startISO}`} className="w-full h-full flex">
-                <EventCard
-                  {...ev}
-                  hoverTilt={false}
-                  featured={false}
-                  layout="image-right" /* keep images on same side for consistent heights */
-                />
-              </div>
-            ))}
-          </div>
+  {/* Top accent line (lowered opacity) */}
+  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#ffcc80]/30 via-white/15 to-transparent" />
 
-          {/* View more → shows two more each click */}
-          {canLoadMore && (
-            <div className="mt-8 flex justify-center">
-              <button
-                onClick={() => setVisibleCount(c => Math.min(c + 2, ordered.length))}
-                className="inline-flex items-center rounded-full bg-[#0d131b] text-white px-5 py-2.5 text-sm font-semibold transition-all hover:brightness-110 hover:shadow-[0_0_24px_rgba(0,0,0,0.45)]"
-              >
-                View more
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="ml-2 h-5 w-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-          )}
+  {/* Neutral (not orange) texture so it doesn’t fight the gradient */}
+  <div
+    aria-hidden
+    className="pointer-events-none absolute inset-0 opacity-10"
+    style={{
+      backgroundImage: "radial-gradient(rgba(255,255,255,0.18) 1px, transparent 1px)",
+      backgroundSize: "12px 12px",
+    }}
+  />
+
+  {/* Optional soft bottom vignette */}
+  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-black/50" />
+
+  <div className="relative mx-auto max-w-screen-2xl px-4 md:px-8">
+    <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white text-center mb-8 drop-shadow-[0_2px_10px_rgba(255,122,26,0.18)]">
+      Upcoming Events
+    </h2>
+
+    {/* Tight grid; wrapper div forces full width without changing EventCard props */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+      {visible.map((ev) => (
+        <div key={`${ev.title}-${ev.startISO}`} className="w-full h-full flex">
+          <EventCard
+            {...ev}
+            hoverTilt={false}
+            featured={false}
+            layout="image-right"
+            // Keep cards warm-dark so they blend with the new section bg
+            cardBgClassName="bg-[linear-gradient(180deg,#2a1709_0%,#171b21_35%,#0f1319_70%,#0b0f14_100%)]"
+          />
         </div>
-      </section>
+      ))}
+    </div>
 
-      <GalleryPreview />
-      <PastHighlights />
+    {/* View more → shows two more each click */}
+    {canLoadMore && (
+      <div className="mt-8 flex justify-center">
+        <button
+          onClick={() => setVisibleCount((c) => Math.min(c + 2, ordered.length))}
+          className="inline-flex items-center rounded-full bg-[#0d131b] text-white px-5 py-2.5 text-sm font-semibold transition-all hover:brightness-110 hover:shadow-[0_0_24px_rgba(255,122,26,0.35)]"
+        >
+          View more
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="ml-2 h-5 w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    )}
+  </div>
+</section>
+
+
+  {/* Gallery should appear orange after dark Events */}
+  <GalleryPreview  />
+  {/* Past highlights dark to continue alternation */}
+  <PastHighlights  />
       <Footer />
     </>
   );

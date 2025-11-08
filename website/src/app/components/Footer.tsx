@@ -40,7 +40,6 @@ const FooterLinkSection: React.FC<FooterLinkProps> = ({ title, links }) => (
 const Footer: React.FC = () => {
   const year = new Date().getFullYear();
 
-  /* Updated, cleaner link structure */
   const explore = [
     { label: "Home", href: "/" },
     { label: "About Us", href: "/about" },
@@ -71,22 +70,33 @@ const Footer: React.FC = () => {
   ];
 
   return (
-    <footer className="relative w-full overflow-hidden bg-[#f57c00] text-white">
-      {/* Top accent line */}
-      <div className="h-[2px] w-full bg-gradient-to-r from-[#ffd19a]/60 via-white/30 to-transparent" />
+    <footer
+      className="relative w-full overflow-hidden text-white mt-[-1px]"
+      style={{
+        background:
+          "linear-gradient(180deg, #0b0f14 0%, #b24f00 45%, #8c3f00 80%, #0b0f14 100%)",
+      }}
+    >
+      {/* 🔶 Soft top glow (consistent with other sections) */}
+      <div className="pointer-events-none absolute inset-x-0 -top-6 h-8 bg-gradient-to-b from-[#f57c00]/20 to-transparent" />
 
-      {/* Subtle dot texture overlay */}
+      {/* 🔸 Accent line */}
+      <div className="h-[2px] w-full bg-gradient-to-r from-[#ffd19a]/60 via-white/25 to-transparent" />
+
+      {/* 🔹 Subtle dot texture */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-15"
+        className="pointer-events-none absolute inset-0 opacity-10"
         style={{
-          backgroundImage: "radial-gradient(rgba(255,255,255,0.3) 1px, transparent 1px)",
-          backgroundSize: "10px 10px",
+          backgroundImage:
+            "radial-gradient(rgba(255,255,255,0.18) 1px, transparent 1px)",
+          backgroundSize: "12px 12px",
         }}
       />
 
+      {/* ---- Content ---- */}
       <div className="relative mx-auto max-w-7xl px-4 py-12">
-        {/* Brand + blurb */}
+        {/* Brand + tagline */}
         <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="space-y-1">
             <h5 className="text-lg font-bold tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
@@ -98,11 +108,11 @@ const Footer: React.FC = () => {
             </p>
           </div>
 
-          {/* Social pills */}
+          {/* Social buttons */}
           <div className="flex flex-wrap items-center gap-3">
             <a
               href="mailto:utsbangladeshisoc@gmail.com"
-              className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#f57c00] shadow-[0_8px_30px_rgba(0,0,0,0.25)] transition hover:-translate-y-px hover:shadow-[0_10px_34px_rgba(0,0,0,0.28)]"
+              className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#b24f00] shadow-[0_8px_30px_rgba(0,0,0,0.25)] transition hover:-translate-y-px hover:shadow-[0_10px_34px_rgba(0,0,0,0.3)]"
             >
               Email Us
             </a>
@@ -110,7 +120,7 @@ const Footer: React.FC = () => {
               href="https://www.instagram.com/utsbdsoc"
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-full border border-white/70 bg-white/20 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white hover:text-[#f57c00]"
+              className="rounded-full border border-white/70 bg-white/20 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white hover:text-[#b24f00]"
             >
               Instagram
             </a>
@@ -118,14 +128,14 @@ const Footer: React.FC = () => {
               href="https://discord.gg/wQupZgkK"
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-full border border-white/70 bg-white/20 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white hover:text-[#f57c00]"
+              className="rounded-full border border-white/70 bg-white/20 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white hover:text-[#b24f00]"
             >
               Discord
             </a>
           </div>
         </div>
 
-        {/* Link columns */}
+        {/* Link sections */}
         <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-4">
           <FooterLinkSection title="Explore" links={explore} />
           <FooterLinkSection title="Our Society" links={ourSociety} />
@@ -136,7 +146,7 @@ const Footer: React.FC = () => {
         {/* Divider */}
         <div className="my-10 h-px w-full bg-gradient-to-r from-transparent via-white/25 to-transparent" />
 
-        {/* Bottom row */}
+        {/* Bottom text row */}
         <div className="flex flex-col items-center justify-between gap-3 text-sm text-white/90 md:flex-row">
           <p>© {year} UTSBDSOC. All rights reserved.</p>
           <div className="flex items-center gap-4">
@@ -153,15 +163,7 @@ const Footer: React.FC = () => {
         </div>
       </div>
 
-      {/* Bottom glow */}
-      <div
-        aria-hidden
-        className="pointer-events-none mx-auto mb-2 h-6 max-w-7xl rounded-full opacity-50"
-        style={{
-          background:
-            "radial-gradient(60% 100% at 50% 0%, rgba(255,140,51,0.35) 0%, rgba(255,140,51,0) 70%)",
-        }}
-      />
+    
     </footer>
   );
 };

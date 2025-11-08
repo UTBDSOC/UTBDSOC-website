@@ -4,48 +4,49 @@ import Link from "next/link";
 import Image from "next/image";
 import { useMemo } from "react";
 
-export default function AboutSection() {
+export default function AboutSection({ variant = "orange" }: { variant?: "orange" | "black" }) {
+  const isOrange = variant === "orange";
+
   const photos = useMemo(
     () => [
-      {
-        src: "/IMG_3697-1024x683.jpg.webp",
-        alt: "Attendees enjoying a vibrant event",
-      },
-      {
-        src: "/Photography-By_Md-Jahangir_0058-1024x681.jpg.webp",
-        alt: "Traditional Bangladeshi cultural performance",
-      },
+      { src: "/IMG_3697-1024x683.jpg.webp", alt: "Attendees enjoying a vibrant event" },
+      { src: "/Photography-By_Md-Jahangir_0058-1024x681.jpg.webp", alt: "Traditional Bangladeshi cultural performance" },
     ],
     []
   );
 
   return (
     <section
-      className="relative bg-[#f57c00] text-white overflow-hidden"
+      className={[
+        "relative text-white overflow-hidden",
+        // 🔶 Bright orange -> burnt orange -> deep dark (plan)
+        isOrange
+          ? "bg-gradient-to-b from-[#f57c00] via-[#b24f00] to-[#0b0f14]"
+          : "bg-black",
+      ].join(" ")}
       aria-labelledby="about-utsbdsoc"
     >
       {/* Top accent line */}
-      <div className="h-[2px] w-full bg-gradient-to-r from-[#ffd19a]/60 via-white/30 to-transparent" />
+      <div className="h-[2px] w-full bg-gradient-to-r from-[#ffcc80]/70 via-white/30 to-transparent" />
+
+      {/* Soft dot texture */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-10"
+        style={{
+          backgroundImage: "radial-gradient(rgba(255,255,255,0.15) 1px, transparent 1px)",
+          backgroundSize: "10px 10px",
+        }}
+      />
 
       {/* Content */}
       <div className="relative mx-auto max-w-7xl px-4 py-14 md:py-20">
-        {/* Subtle dot texture overlay */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-15"
-          style={{
-            backgroundImage:
-              "radial-gradient(rgba(255,255,255,0.3) 1px, transparent 1px)",
-            backgroundSize: "10px 10px",
-          }}
-        />
-
-        <div className="relative grid gap-10 md:grid-cols-2 md:gap-12 items-center">
+        <div className="grid items-center gap-10 md:grid-cols-2 md:gap-12">
           {/* Left column */}
           <div>
             <h2
               id="about-utsbdsoc"
-              className="text-3xl md:text-4xl font-extrabold tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
+              className="text-3xl md:text-4xl font-extrabold tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]"
             >
               About UTSBDSOC
             </h2>
@@ -60,15 +61,15 @@ export default function AboutSection() {
 
             <ul className="mt-6 space-y-2 text-white/95">
               <li className="flex items-start gap-3">
-                <span className="mt-1 inline-block h-2 w-2 rounded-full bg-white" />
+                <span className="mt-1 inline-block h-2 w-2 rounded-full bg-white/90" />
                 Inclusive, student-led community open to all backgrounds
               </li>
               <li className="flex items-start gap-3">
-                <span className="mt-1 inline-block h-2 w-2 rounded-full bg-white" />
+                <span className="mt-1 inline-block h-2 w-2 rounded-full bg-white/90" />
                 Regular cultural nights, socials, sport, and collaborations
               </li>
               <li className="flex items-start gap-3">
-                <span className="mt-1 inline-block h-2 w-2 rounded-full bg-white" />
+                <span className="mt-1 inline-block h-2 w-2 rounded-full bg-white/90" />
                 Leadership opportunities and creative projects
               </li>
             </ul>
@@ -77,14 +78,13 @@ export default function AboutSection() {
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="https://www.activateuts.com.au/clubs/bangladeshi-society"
-                className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-[#f57c00] shadow-[0_8px_30px_rgba(0,0,0,0.25)] transition hover:-translate-y-px hover:shadow-[0_10px_34px_rgba(0,0,0,0.28)]"
+                className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-[#b24f00] shadow-[0_8px_30px_rgba(0,0,0,0.3)] transition hover:-translate-y-px hover:shadow-[0_10px_34px_rgba(0,0,0,0.35)]"
               >
                 Join Now
               </Link>
-
               <Link
                 href="/about"
-                className="rounded-full border border-white px-5 py-2.5 text-sm font-semibold text-white hover:bg-white hover:text-[#f57c00] transition"
+                className="rounded-full border border-white/80 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white hover:text-[#b24f00] transition"
               >
                 Learn More
               </Link>
@@ -97,7 +97,7 @@ export default function AboutSection() {
               {photos.map((photo, i) => (
                 <div
                   key={i}
-                  className="relative overflow-hidden rounded-xl border border-white/25 bg-white/10 backdrop-blur-[2px] shadow-[0_0_24px_rgba(0,0,0,0.18)]"
+                  className="relative overflow-hidden rounded-xl border border-white/20 bg-white/10 backdrop-blur-[2px] shadow-[0_0_24px_rgba(0,0,0,0.25)]"
                 >
                   <div className="aspect-[4/3] w-full">
                     <Image
@@ -117,7 +117,7 @@ export default function AboutSection() {
             <div className="relative mt-4 md:mt-0 md:absolute md:-bottom-4 md:left-1/2 md:-translate-x-1/2 z-10">
               <Link
                 href="/events"
-                className="block md:inline-block w-full md:w-auto text-center rounded-full border border-white/70 bg-white/20 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white hover:text-[#f57c00]"
+                className="block md:inline-block w-full md:w-auto text-center rounded-full border border-white/60 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white hover:text-[#b24f00]"
               >
                 Join us at our next event →
               </Link>
@@ -125,16 +125,6 @@ export default function AboutSection() {
           </div>
         </div>
       </div>
-
-      {/* 🟧 Universal orange transition fade */}
-      <div
-        aria-hidden
-        className="pointer-events-none mx-auto h-8 max-w-7xl rounded-full opacity-50"
-        style={{
-          background:
-            "radial-gradient(60% 100% at 50% 0%, rgba(255,140,51,0.35) 0%, rgba(255,140,51,0) 70%)",
-        }}
-      />
     </section>
   );
 }

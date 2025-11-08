@@ -18,8 +18,8 @@ const NAV_LINKS = [
   { href: "/about-us", label: "About Us" },
   { href: "/events", label: "Events" },
   { href: "/team", label: "Team" },
-  { href: "/dance", label: "Dance" },
-  { href: "/sports", label: "Sports" },
+  // { href: "/dance", label: "Dance" },
+  // { href: "/sports", label: "Sports" },
   { href: "/gallery", label: "Gallery" },
 ];
 
@@ -60,7 +60,7 @@ export default function Navbar() {
       ].join(" ")}
     >
       <div className="mx-auto max-w-7xl px-4">
-        <nav className="flex h-16 md:h-20 items-center gap-4">
+        <nav className="flex h-16 md:h-20 items-center justify-between gap-4">
           {/* brand */}
           <Link
             href="/"
@@ -71,7 +71,7 @@ export default function Navbar() {
           </Link>
 
           {/* desktop links */}
-          <div className="ml-auto hidden md:flex items-center gap-6">
+          <div className="hidden md:flex">
             <ul className="flex items-center gap-2 text-lg font-medium">
               {NAV_LINKS.map(({ href, label }) => {
                 const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -94,32 +94,32 @@ export default function Navbar() {
                 );
               })}
             </ul>
+          </div>
 
-            {/* socials */}
-            <div className="ml-2 flex items-center gap-3">
-              {SOCIALS.map(({ href, icon: Icon, label }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  className="rounded-md p-1 text-white/90 hover:text-[#ffb066] hover:drop-shadow-[0_0_10px_rgba(255,140,51,0.4)] transition"
-                >
-                  <Icon size={20} />
-                </a>
-              ))}
-
-              {/* Membership */}
+          {/* socials & membership */}
+          <div className="hidden md:flex items-center gap-3">
+            {SOCIALS.map(({ href, icon: Icon, label }) => (
               <a
-                href="https://www.activateuts.com.au/clubs/bangladeshi-society"
+                key={label}
+                href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="ml-1 rounded-full bg-white px-4 py-2.5 font-semibold text-[#f57c00] shadow-md hover:bg-[#fff5d9] hover:scale-[1.03] transition-transform"
+                aria-label={label}
+                className="rounded-md p-1 text-white/90 hover:text-[#ffb066] hover:drop-shadow-[0_0_10px_rgba(255,140,51,0.4)] transition"
               >
-                Membership
+                <Icon size={20} />
               </a>
-            </div>
+            ))}
+
+            {/* Membership */}
+            <a
+              href="https://www.activateuts.com.au/clubs/bangladeshi-society"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-1 rounded-full bg-white px-4 py-2.5 font-semibold text-[#f57c00] shadow-md hover:bg-[#fff5d9] hover:scale-[1.03] transition-transform"
+            >
+              Membership
+            </a>
           </div>
 
           {/* mobile burger */}
