@@ -6,7 +6,7 @@ import Image from "next/image";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
-/* ========= tiny helpers for persisted state (per image src) ========= */
+/* ========= PERSISTENCE HELPERS ========= */
 type CountMap = Record<string, number>;
 type CommentMap = Record<string, { text: string; at: number }[]>;
 
@@ -47,190 +47,228 @@ function useLocalComments(key: string, initial: CommentMap = {}) {
   return { map, add };
 }
 
+/* ========= DATA: 3 CATEGORIES ========= */
+const ALL_IMAGES = [
+  // --- 1. MOCK HOLUD (PHOTOLIA) ---
+  { src: "/events/PHOTOLIA_-58.jpg", category: "Mock Holud", w: 1600, h: 1067, alt: "Vibrant entrance" },
+  { src: "/events/PHOTOLIA_-125.jpg", category: "Mock Holud", w: 1600, h: 1067, alt: "Dance performance" },
+  { src: "/events/PHOTOLIA_-145.jpg", category: "Mock Holud", w: 1600, h: 1067, alt: "Crowd cheering" },
+  { src: "/events/PHOTOLIA_-152.jpg", category: "Mock Holud", w: 1600, h: 1067, alt: "Traditional rituals" },
+  { src: "/events/PHOTOLIA_-158.jpg", category: "Mock Holud", w: 1600, h: 1067, alt: "Group dance sync" },
+  { src: "/events/PHOTOLIA_-171.jpg", category: "Mock Holud", w: 1600, h: 1067, alt: "Colorful attire" },
+  { src: "/events/PHOTOLIA_-181.jpg", category: "Mock Holud", w: 1600, h: 1067, alt: "Candid smiles" },
+  { src: "/events/PHOTOLIA_-196.jpg", category: "Mock Holud", w: 1600, h: 1067, alt: "Stage decor" },
+  { src: "/events/PHOTOLIA_-215.jpg", category: "Mock Holud", w: 1600, h: 1067, alt: "Group photo" },
+  { src: "/events/PHOTOLIA_-217.jpg", category: "Mock Holud", w: 1600, h: 1067, alt: "Performance close up" },
+  { src: "/events/PHOTOLIA_-224.jpg", category: "Mock Holud", w: 1600, h: 1067, alt: "Audience reaction" },
+  { src: "/events/PHOTOLIA_-226.jpg", category: "Mock Holud", w: 1600, h: 1067, alt: "Sweets and treats" },
+  { src: "/events/PHOTOLIA_-271.jpg", category: "Mock Holud", w: 1600, h: 1067, alt: "Friends gathering" },
+  { src: "/events/PHOTOLIA_-418.jpg", category: "Mock Holud", w: 1600, h: 1067, alt: "Evening lights" },
+  { src: "/events/PHOTOLIA_-455.jpg", category: "Mock Holud", w: 1600, h: 1067, alt: "Closing ceremony" },
+  { src: "/events/PHOTOLIA_-461.jpg", category: "Mock Holud", w: 1600, h: 1067, alt: "Final group shot" },
+
+  // --- 2. GAMES NIGHT ---
+  { src: "/events/GamesNight.jpg", category: "Games Night", w: 1600, h: 1067, alt: "Board game strategy" },
+  { src: "/events/GamesNight(1).jpg", category: "Games Night", w: 1600, h: 1067, alt: "Card games" },
+
+  // --- 3. CHAAD RAAT ---
+  { src: "/events/chaadraatutsbdsoc-150.jpg", category: "Chaad Raat", w: 1600, h: 1067, alt: "Henna art" },
+  { src: "/events/chaadraatutsbdsoc-176.jpg", category: "Chaad Raat", w: 1600, h: 1067, alt: "Traditional fashion" },
+];
+
+const CATEGORIES = ["Mock Holud", "Games Night", "Chaad Raat"];
+
 export default function GalleryPage() {
-  // Image Data
-  const images = useMemo(
-    () => [
-      { src: "/gallery/2025-cultural-night-01.jpg", alt: "Troupe performing traditional Bangladeshi dance on stage", tags: ["dance", "cultural"], event: "Cultural Night", year: 2025, w: 1600, h: 1067, caption: "Spotlight on tradition at Cultural Night." },
-      { src: "/gallery/2025-o-week-01.jpg", alt: "Society booth at O-Week with members smiling", tags: ["community", "o-week"], event: "O-Week", year: 2025, w: 1600, h: 1200, caption: "New faces, big smiles — O-Week vibes." },
-      { src: "/gallery/2024-workshop-01.jpg", alt: "Beginner dance workshop – circle formation", tags: ["dance", "workshop"], event: "Dance Workshop", year: 2024, w: 1600, h: 1067, caption: "First steps together in our beginner workshop." },
-      { src: "/gallery/2024-picnic-01.jpg", alt: "Spring picnic group photo at UTS Alumni Green", tags: ["community", "social"], event: "Spring Picnic", year: 2024, w: 1600, h: 1067, caption: "Sun, snacks, and the best company." },
-      { src: "/gallery/2024-culture-02.jpg", alt: "Solo classical performance in orange costume", tags: ["dance", "cultural"], event: "Culture Fest", year: 2024, w: 1600, h: 1067, caption: "Grace in every beat at Culture Fest." },
-      { src: "/gallery/2023-sports-01.jpg", alt: "Indoor sports day – badminton doubles mid-rally", tags: ["sports", "community"], event: "Sports Day", year: 2023, w: 1600, h: 1067, caption: "Rallying together on Sports Day." },
-    ],
-    []
-  );
-
-  const uniqueYears = Array.from(new Set(images.map(i => i.year))).sort((a,b)=>b-a);
-  const uniqueTags  = Array.from(new Set(images.flatMap(i=>i.tags))).sort();
-
-  const [query, setQuery] = useState("");
-  const [year, setYear]   = useState("all");
-  const [tag, setTag]     = useState("all");
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-
-  // persisted likes & comments
   const { map: likes, set: setLike } = useLocalCount("utsbdsoc.gallery.likes");
   const { map: comments, add: addComment } = useLocalComments("utsbdsoc.gallery.comments");
 
-  const filtered = useMemo(()=>{
-    return images.filter(img=>{
-      const q=query.trim().toLowerCase();
-      const matchesQ   = q ? img.alt.toLowerCase().includes(q) || img.event.toLowerCase().includes(q) || img.caption?.toLowerCase().includes(q) : true;
-      const matchesYear= year==="all" ? true : img.year===Number(year);
-      const matchesTag = tag==="all" ? true : img.tags.includes(tag);
-      return matchesQ && matchesYear && matchesTag;
-    });
-  },[images,query,year,tag]);
+  // Flattened list for lightbox navigation
+  const flattenImages = useMemo(() => ALL_IMAGES, []);
 
-  // feed list (sorted, repeated to feel longer)
+  // --- FEED LOGIC (Mixes all images for the TikTok feed) ---
   const feedItems = useMemo(() => {
-    const base = [...filtered].sort((a,b)=>b.year-a.year);
+    // Copy the list and repeat it to make the scroll feel longer
+    const base = [...ALL_IMAGES]; 
     const out: typeof base = [];
-    const reps = Math.max(1, Math.ceil(24 / Math.max(1, base.length)));
+    const reps = Math.ceil(24 / Math.max(1, base.length)); // Ensure reasonable scroll length
     for (let i=0;i<reps;i++) out.push(...base);
-    return out.slice(0, 24);
-  }, [filtered]);
+    return out.slice(0, 30); // Limit to 30 items for performance
+  }, []);
 
-  // Lightbox keyboard nav
+  // --- KEYBOARD NAV ---
   const handleKey = useCallback((e: KeyboardEvent) => {
     if (openIndex === null) return;
     if (e.key === "Escape") setOpenIndex(null);
-    if (e.key === "ArrowRight") setOpenIndex(prev => (prev == null ? 0 : (prev + 1) % filtered.length));
-    if (e.key === "ArrowLeft")  setOpenIndex(prev => (prev == null ? 0 : (prev - 1 + filtered.length) % filtered.length));
-  }, [openIndex, filtered.length]);
+    if (e.key === "ArrowRight") setOpenIndex(prev => (prev == null ? 0 : (prev + 1) % flattenImages.length));
+    if (e.key === "ArrowLeft")  setOpenIndex(prev => (prev == null ? 0 : (prev - 1 + flattenImages.length) % flattenImages.length));
+  }, [openIndex, flattenImages.length]);
 
   useEffect(()=>{
     window.addEventListener("keydown",handleKey);
     return()=>window.removeEventListener("keydown",handleKey);
   },[handleKey]);
 
+  const scrollToCategory = (cat: string) => {
+    const el = document.getElementById(cat);
+    if (el) {
+      const y = el.getBoundingClientRect().top + window.scrollY - 120;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  };
+
   return (
     <>
       <Navbar />
 
-      {/* Hero */}
+      {/* --- HERO --- */}
       <motion.section
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="relative bg-[#ff7a1a] text-white py-16 md:py-20 px-6 text-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="relative bg-[#0a0a0a] text-white pt-32 pb-16 px-6 text-center overflow-hidden border-b border-white/10"
       >
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-3 md:mb-4">Gallery</h1>
-          <p className="text-base md:text-lg text-white/90">Showcasing dance, culture, and community moments from UTS Bangladeshi Society.</p>
-        </div>
-        <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0]" aria-hidden="true">
-          <svg className="relative block w-[calc(100%+1.3px)] h-[60px]" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 1200 120"><path d="M321.39 56.19C175.39 86.5 0 47.72 0 47.72V120h1200V47.72s-140.91 18.27-305.61 2.28c-137.57-12.86-263.72-43.23-397.09-33.69C380.23 23.56 361.33 48.13 321.39 56.19z" fill="#0b0f14"/></svg>
+        <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} />
+        
+        <div className="relative z-10 max-w-3xl mx-auto">
+          <div className="flex items-center justify-center gap-3 mb-4">
+             <span className="h-[3px] w-12 bg-[#ea580c]"></span>
+             <span className="text-xs font-black uppercase tracking-[0.3em] text-white/50">
+               The Archives
+             </span>
+             <span className="h-[3px] w-12 bg-[#ea580c]"></span>
+          </div>
+          <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-6 text-white">
+            GALLERY
+          </h1>
+          
+          {/* Category Quick Links */}
+          <div className="flex flex-wrap justify-center gap-4">
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat}
+                onClick={() => scrollToCategory(cat)}
+                className="px-6 py-2 rounded-full border-2 border-white/20 hover:border-[#ea580c] hover:text-[#ea580c] hover:bg-white/5 text-sm font-bold uppercase tracking-wider transition-all"
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
       </motion.section>
 
-      {/* Gallery */}
-      <section className="bg-[#0b0f14] text-white py-12 md:py-14 px-4">
-        <div className="max-w-7xl mx-auto">
-          {/* Controls */}
-          <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between mb-8">
-            <h2 className="text-2xl md:text-3xl font-semibold text-[#ff7a1a]">Our Highlights</h2>
-            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-              <input
-                value={query}
-                onChange={e=>setQuery(e.target.value)}
-                placeholder="Search events..."
-                className="w-full rounded-2xl bg-[#10161d] border border-white/10 px-4 py-2.5 text-sm outline-none focus:border-[#ff7a1a] focus:ring-2 focus:ring-[#ff7a1a]/30"
-              />
-              <select
-                value={tag}
-                onChange={e=>setTag(e.target.value)}
-                className="rounded-2xl bg-[#10161d] border border-white/10 px-3 py-2.5 text-sm focus:border-[#ff7a1a] focus:ring-2 focus:ring-[#ff7a1a]/30"
-              >
-                <option value="all">All tags</option>
-                {uniqueTags.map(t=>(<option key={t}>{t}</option>))}
-              </select>
-              <select
-                value={year}
-                onChange={e=>setYear(e.target.value)}
-                className="rounded-2xl bg-[#10161d] border border-white/10 px-3 py-2.5 text-sm focus:border-[#ff7a1a] focus:ring-2 focus:ring-[#ff7a1a]/30"
-              >
-                <option value="all">All years</option>
-                {uniqueYears.map(y=>(<option key={y}>{y}</option>))}
-              </select>
-            </div>
+      {/* --- MAIN CONTENT --- */}
+      <section className="bg-[#0a0a0a] text-white py-12 px-4 min-h-screen relative">
+        <div className="absolute inset-0 opacity-[0.07] pointer-events-none" style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} />
+
+        <div className="relative z-10 max-w-7xl mx-auto space-y-24">
+          
+          {/* === SECTION 1: VERTICAL SCROLL FEED (RESTORED) === */}
+          <div className="mb-24 border-b-2 border-white/10 pb-24">
+             <div className="flex items-center justify-center gap-3 mb-12">
+               <span className="w-3 h-3 bg-[#ea580c] rounded-full animate-pulse"></span>
+               <h2 className="text-2xl font-black uppercase tracking-widest text-white">Live Reel</h2>
+             </div>
+             <VerticalSnapFeed
+               items={feedItems}
+               likes={likes}
+               onLike={(src)=>setLike(src, 1)}
+               onOpen={(feedIdx) => {
+                 // Find the correct index in the FULL list based on the source url
+                 const src = feedItems[feedIdx]?.src;
+                 const idx = ALL_IMAGES.findIndex(i => i.src === src);
+                 if (idx >= 0) setOpenIndex(idx);
+               }}
+             />
           </div>
 
-          {/* === Smooth Vertical Snap Feed (fixed 4:5 cards) with motion + reactions === */}
-          <VerticalSnapFeed
-            items={feedItems}
-            likes={likes}
-            onLike={(src)=>setLike(src, 1)}
-            onOpen={(feedIdx) => {
-              const src = feedItems[feedIdx]?.src;
-              const idx = filtered.findIndex(i => i.src === src);
-              if (idx >= 0) setOpenIndex(idx);
-            }}
-          />
+          {/* === SECTION 2: CATEGORIZED GRIDS === */}
+          {CATEGORIES.map((category) => {
+            const catImages = ALL_IMAGES.filter(img => img.category === category);
+            
+            return (
+              <div key={category} id={category} className="scroll-mt-32">
+                {/* Category Header */}
+                <div className="flex items-end gap-4 mb-8 border-b-2 border-white/10 pb-4">
+                  <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter leading-none">
+                    {category}
+                  </h2>
+                  <span className="text-[#ea580c] font-bold text-lg mb-1">/ 2025</span>
+                  <span className="ml-auto text-white/40 font-mono text-sm hidden sm:block">
+                    {catImages.length} PHOTOS
+                  </span>
+                </div>
 
-          {/* Masonry below */}
-          <div className="mt-12 columns-1 sm:columns-2 lg:columns-3 gap-4 [column-fill:_balance]">
-            {filtered.map((img,idx)=>(
-              <motion.figure
-                key={img.src}
-                layout
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.35 }}
-                className="mb-4 break-inside-avoid overflow-hidden rounded-2xl bg-[#10161d] border border-white/5 group"
-              >
-                <button onClick={()=>setOpenIndex(idx)} className="relative block w-full focus:outline-none focus:ring-2 focus:ring-[#ff7a1a]">
-                  <Image src={img.src} alt={img.alt} width={img.w} height={img.h} className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-[1.03]" loading="lazy"/>
-                </button>
-                <figcaption className="px-4 py-3 text-sm text-white/80">
-                  <div className="flex items-center justify-between">
-                    <span className="truncate">{img.event}</span>
-                    <span className="text-white/50">{img.year}</span>
-                  </div>
-                  <p className="text-white/60 mt-1">{img.caption}</p>
+                {/* Masonry Grid for Category */}
+                <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+                  {catImages.map((img) => {
+                    // Find global index for lightbox
+                    const globalIndex = ALL_IMAGES.findIndex(x => x.src === img.src);
+                    
+                    return (
+                      <motion.figure
+                        key={img.src}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.1 }}
+                        transition={{ duration: 0.4 }}
+                        className="break-inside-avoid group relative bg-white p-1 shadow-[4px_4px_0px_0px_#ea580c] cursor-pointer hover:-translate-y-1 transition-transform"
+                        onClick={() => setOpenIndex(globalIndex)}
+                      >
+                        <div className="relative w-full overflow-hidden bg-black">
+                          <Image 
+                            src={img.src} 
+                            alt={img.alt} 
+                            width={img.w} 
+                            height={img.h} 
+                            className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105 grayscale hover:grayscale-0" 
+                            loading="lazy"
+                          />
+                          {/* Hover Overlay */}
+                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                             <span className="bg-[#ea580c] text-white px-3 py-1 font-bold uppercase tracking-widest text-xs shadow-md">
+                               View
+                             </span>
+                          </div>
+                        </div>
+                        <figcaption className="p-3 bg-white flex justify-between items-center">
+                          <span className="text-black font-bold text-xs uppercase truncate max-w-[70%]">{img.alt}</span>
+                          <button 
+                            onClick={(e)=>{e.stopPropagation(); setLike(img.src, 1)}} 
+                            className="text-black font-bold text-xs uppercase hover:text-[#ea580c] flex items-center gap-1"
+                          >
+                            ❤️ {likes[img.src] || 0}
+                          </button>
+                        </figcaption>
+                      </motion.figure>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
 
-                  {/* reactions + comments (compact) */}
-                  <div className="mt-3 flex items-center justify-between">
-                    <motion.button
-                      whileTap={{ scale: 0.92 }}
-                      onClick={()=>setLike(img.src, 1)}
-                      className="rounded-full bg-white/10 hover:bg-white/15 px-3 py-1 text-xs"
-                      aria-label="Like"
-                    >
-                      ❤️ {likes[img.src] || 0}
-                    </motion.button>
-                    <OpenInLightboxHint />
-                  </div>
-                </figcaption>
-              </motion.figure>
-            ))}
-          </div>
-
-          {openIndex!==null && (
+          {/* === LIGHTBOX === */}
+            {openIndex !== null && (
             <Lightbox
-              items={filtered}
-              index={openIndex}
-              onClose={()=>setOpenIndex(null)}
-              onNext={()=>setOpenIndex(prev=>(prev!==null ? (prev+1)%filtered.length : 0))}
-              onPrev={()=>setOpenIndex(prev=>(prev!==null ? (prev-1+filtered.length)%filtered.length : filtered.length-1))}
+              items={flattenImages}
+              index={openIndex!}
+              onClose={() => setOpenIndex(null)}
+              onNext={() => setOpenIndex((openIndex! + 1) % flattenImages.length)}
+              onPrev={() => setOpenIndex((openIndex! - 1 + flattenImages.length) % flattenImages.length)}
               likes={likes}
-              onLike={(src)=>setLike(src,1)}
+              onLike={(src: string) => setLike(src, 1)}
               comments={comments}
-              onAddComment={addComment}
+              onAddComment={(src: string, text: string) => addComment(src, text)}
             />
-          )}
+            )}
         </div>
       </section>
 
-      {/* Hide scrollbars globally + utility */}
+      {/* Global Scrollbar Hide */}
       <style jsx global>{`
         html, body { overflow-y: auto; }
         *::-webkit-scrollbar { display: none; }
         * { -ms-overflow-style: none; scrollbar-width: none; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
       <Footer />
@@ -238,11 +276,7 @@ export default function GalleryPage() {
   );
 }
 
-/* =================== Vertical Snap Feed (reduced gap) =================== */
-
-function OpenInLightboxHint() {
-  return <span className="text-xs text-white/60">Tap to open</span>;
-}
+/* =================== VERTICAL SNAP FEED (INDUSTRIAL STYLE) =================== */
 
 function VerticalSnapFeed({
   items,
@@ -250,13 +284,14 @@ function VerticalSnapFeed({
   onLike,
   onOpen,
 }: {
-  items: { src:string; alt:string; event:string; year:number; caption?:string }[];
+  items: any[];
   likes: Record<string, number>;
   onLike: (src: string)=>void;
   onOpen: (index:number)=>void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Keyboard scroll support
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -272,285 +307,154 @@ function VerticalSnapFeed({
   }, []);
 
   return (
-    <div className="mx-auto w-full">
-      <h3 className="text-xl font-semibold text-white/90 mb-4">Swipe feed</h3>
-
+    <div className="mx-auto w-full max-w-2xl">
+      {/* The Scroll Container */}
       <div
         ref={containerRef}
         tabIndex={0}
         className="
-          no-scrollbar relative mx-auto
-          h-[86svh] md:h-[86svh]
-          max-w-[720px]
+          relative mx-auto
+          h-[80vh]
+          w-full
           overflow-y-auto
           snap-y snap-mandatory scroll-smooth
           overscroll-contain
-          rounded-2xl border border-white/10 bg-[#0e141b]
-          [-webkit-overflow-scrolling:touch]
-          focus:outline-none focus:ring-1 focus:ring-[#ff7a1a]/50
+          rounded-xl border-2 border-white/10 bg-[#111]
+          shadow-[0_0_40px_-10px_rgba(0,0,0,0.7)]
+          focus:outline-none focus:border-[#ea580c]
         "
       >
         {items.map((it, i) => (
           <article
             key={`${it.src}-${i}`}
-            className="snap-start [scroll-snap-stop:always] min-h-[86svh] flex flex-col px-3 sm:px-4"
-            aria-label={`${it.event} ${it.year}`}
+            className="snap-start h-full w-full flex items-center justify-center p-4 sm:p-8 relative"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between pt-2 pb-1">
-              <div className="flex items-center gap-2 min-w-0">
-                <motion.div
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  whileInView={{ scale: 1, opacity: 1 }}
-                  viewport={{ once: true }}
-                  className="h-8 w-8 rounded-full bg-[#ff7a1a]"
-                  aria-hidden
+            {/* Card Frame */}
+            <div className="relative w-full max-w-[500px] bg-white p-2 shadow-2xl transform transition-transform duration-500 hover:scale-[1.01]">
+              
+              {/* Header Info (Inside Frame) */}
+              <div className="flex justify-between items-center px-2 pb-2 pt-1">
+                 <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-[#ea580c] rounded-full"></div>
+                    <span className="text-black font-black text-sm uppercase tracking-tight">{it.category}</span>
+                 </div>
+                 <span className="text-gray-400 font-bold text-xs">2025</span>
+              </div>
+
+              {/* Image Clickable Area */}
+              <button 
+                onClick={()=>onOpen(i)} 
+                className="relative w-full aspect-[4/5] overflow-hidden bg-black group"
+              >
+                <Image
+                  src={it.src}
+                  alt={it.alt}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-105 grayscale group-hover:grayscale-0"
+                  priority={i < 2}
                 />
-                <div className="min-w-0">
-                  <p className="text-sm text-white truncate"><strong>{it.event}</strong> • {it.year}</p>
-                  <p className="text-xs text-white/60 truncate">{it.alt}</p>
+                
+                {/* Hard overlay on hover */}
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                   <span className="bg-[#ea580c] text-white px-4 py-2 font-bold uppercase tracking-widest shadow-[4px_4px_0px_0px_black]">
+                     Open
+                   </span>
                 </div>
-              </div>
-              <span className="text-xs text-white/50">{i+1}/{items.length}</span>
-            </div>
+              </button>
 
-            {/* Media card */}
-            <motion.button
-              whileTap={{ scale: 0.98 }}
-              onClick={()=>onOpen(i)}
-              className="
-                relative mx-auto w-full
-                max-w-[640px]
-                aspect-[4/5] max-h-[72svh]
-                rounded-xl overflow-hidden
-                bg-[#0b0f14] border border-white/10
-                shadow-[0_8px_24px_rgba(0,0,0,0.35)]
-                focus:outline-none focus:ring-2 focus:ring-[#ff7a1a]
-              "
-              aria-label={`Open ${it.event} ${it.year}`}
-            >
-              <Image
-                src={it.src}
-                alt={it.alt}
-                fill
-                sizes="(max-width: 768px) 90vw, 640px"
-                className="object-cover will-change-transform"
-                priority={i<2}
-              />
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/50 to-transparent" />
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/60 to-transparent" />
-              {/* Caption overlay */}
-              {it.caption && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  className="absolute inset-x-0 bottom-0 p-3 text-sm text-white/90"
-                >
-                  <span className="line-clamp-2">{it.caption}</span>
-                </motion.div>
-              )}
-            </motion.button>
-
-            {/* Reactions row */}
-            <div className="mx-auto w-full max-w-[640px] px-1 sm:px-0">
-              <div className="flex items-center justify-between text-xs text-white/70 py-2">
-                <div className="flex items-center gap-2">
-                  <motion.button
-                    whileTap={{ scale: 0.9 }}
-                    onClick={()=>onLike(it.src)}
-                    className="rounded-full bg-white/10 hover:bg-white/15 px-3 py-1.5"
-                    aria-label="Like"
-                  >
-                    ❤️ {likes[it.src] || 0}
-                  </motion.button>
-                </div>
-                <span className="text-white/60">Swipe ↑/↓ • Tap to open</span>
+              {/* Footer Info */}
+              <div className="pt-3 px-2 pb-1">
+                 <p className="text-gray-600 text-sm font-medium leading-snug line-clamp-2 mb-3">
+                   {it.alt}
+                 </p>
+                 
+                 <div className="flex justify-between items-center border-t-2 border-black/5 pt-3">
+                    <button 
+                      onClick={(e)=>{e.stopPropagation(); onLike(it.src)}}
+                      className="flex items-center gap-2 text-black font-bold text-xs uppercase hover:text-[#ea580c] transition-colors"
+                    >
+                      <span className="text-lg">❤️</span> {likes[it.src] || 0} Likes
+                    </button>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                      {i + 1} / {items.length}
+                    </span>
+                 </div>
               </div>
+
             </div>
           </article>
         ))}
+      </div>
+      
+      {/* Hint */}
+      <div className="text-center mt-4">
+         <p className="text-white/30 text-xs font-bold uppercase tracking-widest animate-pulse">
+           Scroll / Swipe 
+         </p>
       </div>
     </div>
   );
 }
 
-/* =================== Lightbox with likes + comments (unchanged) =================== */
+/* =================== LIGHTBOX (Industrial) =================== */
 
-interface LightboxItem {
-  src: string;
-  alt: string;
-  event: string;
-  year: number;
-  w: number;
-  h: number;
-  caption?: string;
-}
-
-function Lightbox({
-  items,
-  index,
-  onClose,
-  onNext,
-  onPrev,
-  likes,
-  onLike,
-  comments,
-  onAddComment,
-}: {
-  items: LightboxItem[];
-  index: number;
-  onClose: () => void;
-  onNext: () => void;
-  onPrev: () => void;
-  likes: Record<string, number>;
-  onLike: (src: string)=>void;
-  comments: Record<string, { text: string; at: number }[]>;
-  onAddComment: (src: string, text: string)=>void;
-}) {
+function Lightbox({ items, index, onClose, onNext, onPrev, likes, onLike, comments, onAddComment }: any) {
   const item = items[index];
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const touch = useRef({ startX: 0, startY: 0, dx: 0, dy: 0 });
   const [text, setText] = useState("");
-
-  useEffect(() => {
-    const closeButton = dialogRef.current?.querySelector("button[data-close]");
-    if (closeButton instanceof HTMLButtonElement) closeButton.focus();
-  }, []);
-
-  useEffect(() => {
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = originalOverflow; };
-  }, []);
-
-  const tstart = (e: React.TouchEvent): void => {
-    const t = e.changedTouches[0];
-    touch.current = { startX: t.clientX, startY: t.clientY, dx: 0, dy: 0 };
-  };
-  const tmove = (e: React.TouchEvent): void => {
-    const t = e.changedTouches[0];
-    touch.current.dx = t.clientX - touch.current.startX;
-    touch.current.dy = t.clientY - touch.current.startY;
-  };
-  const tend = () => {
-    const { dx, dy } = touch.current;
-    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
-      dx < 0 ? onNext() : onPrev();
-    }
-  };
-
-  const downloadName = item.src.split("/").pop() || "image.jpg";
-  const countLabel = `${index + 1} / ${items.length}`;
-  const thread = comments[item.src] || [];
 
   return (
     <AnimatePresence>
       <motion.div
-        role="dialog"
-        aria-modal
-        aria-label={`${item.event} • ${item.year} – ${countLabel}`}
-        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4"
+        className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center p-2 sm:p-6"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         onClick={onClose}
-        ref={dialogRef}
-        onTouchStart={tstart}
-        onTouchMove={tmove}
-        onTouchEnd={tend}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
       >
-        <motion.div
-          layout
-          initial={{ scale: 0.98, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.98, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 220, damping: 24 }}
-          className="relative w-full max-w-6xl max-h-[90vh] bg-[#0b0f14] rounded-2xl border border-white/10 overflow-hidden"
-          onClick={(e)=>e.stopPropagation()}
-        >
-          {/* header */}
-          <div className="flex items-center justify-between gap-3 px-4 py-3 bg-[#0e141b] border-b border-white/10">
-            <div className="min-w-0 flex-1">
-              <div className="text-white/90 text-sm md:text-base truncate">
-                <strong className="text-white">{item.event}</strong> • {item.year}
-              </div>
-              <div className="text-white/60 text-xs truncate">{item.alt}</div>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="hidden sm:inline text-white/60 text-xs mr-2">{countLabel}</span>
-              <a href={item.src} download={downloadName} className="rounded-full px-3 py-1.5 text-sm bg-white/10 hover:bg-white/15 text-white">Download</a>
-              <button onClick={onClose} data-close className="rounded-full px-3 py-1.5 text-sm bg-white/10 hover:bg-white/15 text-white">Close</button>
-            </div>
+        <div className="flex w-full max-w-6xl h-full max-h-[85vh] bg-[#111] border-2 border-white/10 shadow-2xl overflow-hidden flex-col md:flex-row" onClick={e=>e.stopPropagation()}>
+          
+          {/* Image */}
+          <div className="flex-1 relative bg-black flex items-center justify-center">
+             <Image src={item.src} alt={item.alt} fill className="object-contain" />
+             <button onClick={onPrev} className="absolute left-4 p-3 bg-white text-black font-bold hover:bg-[#ea580c] hover:text-white transition-colors shadow-[4px_4px_0px_0px_black]">←</button>
+             <button onClick={onNext} className="absolute right-4 p-3 bg-white text-black font-bold hover:bg-[#ea580c] hover:text-white transition-colors shadow-[4px_4px_0px_0px_black]">→</button>
           </div>
 
-          {/* content split: media left, thread right */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
-            {/* media */}
-            <div className="md:col-span-2 relative flex items-center justify-center p-4">
-              <Image
-                src={item.src}
-                alt={item.alt}
-                width={item.w}
-                height={item.h}
-                className="max-h-[60vh] md:max-h-[76vh] w-auto h-auto object-contain"
-                priority
-              />
-              <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-2 pointer-events-none">
-                <button onClick={onPrev} aria-label="Previous" className="pointer-events-auto rounded-full bg-white/10 hover:bg-white/15 p-3">◀</button>
-                <button onClick={onNext} aria-label="Next" className="pointer-events-auto rounded-full bg-white/10 hover:bg-white/15 p-3">▶</button>
-              </div>
-            </div>
+          {/* Sidebar */}
+          <div className="w-full md:w-[380px] bg-white flex flex-col border-l-2 border-black">
+             <div className="p-5 border-b-2 border-black/10 bg-gray-50">
+                <h2 className="text-xl font-black text-black uppercase leading-none">{item.category}</h2>
+                <p className="text-[#ea580c] font-bold text-xs mt-1">2025</p>
+                <p className="text-gray-600 text-sm mt-3 leading-relaxed">{item.alt}</p>
+             </div>
 
-            {/* reactions + comments */}
-            <div className="border-t md:border-t-0 md:border-l border-white/10 bg-[#0b0f14]/80 flex flex-col min-h-0">
-              <div className="p-3 md:p-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <motion.button
-                    whileTap={{ scale: 0.92 }}
-                    onClick={()=>onLike(item.src)}
-                    className="rounded-full bg-white/10 hover:bg-white/15 px-3 py-1.5 text-sm"
-                  >
-                    ❤️ {likes[item.src] || 0}
-                  </motion.button>
-                </div>
-                <span className="text-xs text-white/60">{item.caption || ""}</span>
-              </div>
-
-              {/* thread */}
-              <div className="px-3 md:px-4 flex-1 overflow-y-auto no-scrollbar space-y-3">
-                {thread.length === 0 && (
-                  <p className="text-white/50 text-sm pt-2">Be the first to comment.</p>
-                )}
-                {thread.map((c, idx) => (
-                  <div key={idx} className="rounded-xl border border-white/10 bg-[#0e141b] p-2.5">
-                    <p className="text-sm text-white/90">{c.text}</p>
-                  </div>
+             {/* Comments */}
+             <div className="flex-1 overflow-y-auto p-5 space-y-3 bg-white">
+                {(comments[item.src] || []).map((c: any, i: number) => (
+                   <div key={i} className="bg-gray-100 p-3 border-l-4 border-[#ea580c]">
+                      <p className="text-sm text-black font-medium">{c.text}</p>
+                   </div>
                 ))}
-              </div>
+             </div>
 
-              {/* composer */}
-              <form
-                className="p-3 md:p-4 border-t border-white/10 flex gap-2"
-                onSubmit={(e)=>{ e.preventDefault(); onAddComment(item.src, text); setText(""); }}
-              >
-                <input
-                  value={text}
-                  onChange={e=>setText(e.target.value)}
-                  placeholder="Add a comment…"
-                  className="flex-1 rounded-xl bg-[#10161d] border border-white/10 px-3 py-2 text-sm outline-none focus:border-[#ff7a1a] focus:ring-2 focus:ring-[#ff7a1a]/30"
-                />
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  className="rounded-xl bg-[#ff7a1a] text-white px-3 py-2 text-sm"
-                  type="submit"
-                >
-                  Post
-                </motion.button>
-              </form>
-            </div>
+             {/* Action */}
+             <div className="p-4 bg-gray-50 border-t-2 border-black/10">
+                <div className="flex items-center justify-between mb-3">
+                   <button onClick={()=>onLike(item.src)} className="text-black font-bold text-xs uppercase flex gap-2 items-center hover:text-[#ea580c]">
+                      <span className="text-xl">❤️</span> {likes[item.src] || 0}
+                   </button>
+                   <button onClick={onClose} className="text-gray-400 hover:text-black text-xs font-bold uppercase">Close</button>
+                </div>
+                <form className="flex gap-2" onSubmit={(e)=>{e.preventDefault(); onAddComment(item.src, text); setText("");}}>
+                   <input 
+                     value={text} 
+                     onChange={e=>setText(e.target.value)} 
+                     placeholder="Add comment..." 
+                     className="flex-1 bg-white border-2 border-black/10 px-3 py-2 text-sm text-black font-medium focus:outline-none focus:border-[#ea580c]" 
+                   />
+                   <button className="bg-black text-white px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-[#ea580c]">Post</button>
+                </form>
+             </div>
           </div>
-        </motion.div>
+        </div>
       </motion.div>
     </AnimatePresence>
   );

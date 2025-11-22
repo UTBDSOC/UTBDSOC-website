@@ -8,12 +8,15 @@ interface FooterLinkProps {
 }
 
 const FooterLinkSection: React.FC<FooterLinkProps> = ({ title, links }) => (
-  <div className="space-y-3">
-    <h6 className="text-sm font-semibold tracking-wide text-white/90">{title}</h6>
-    <ul className="space-y-2">
+  <div className="space-y-4">
+    {/* Industrial Header Style */}
+    <h6 className="text-xs font-black uppercase tracking-[0.2em] text-black/70 border-b-2 border-black/10 pb-2 inline-block">
+      {title}
+    </h6>
+    <ul className="space-y-2.5">
       {links.map((link, index) => {
         const className =
-          "text-sm text-white/90 hover:text-white transition-colors duration-200";
+          "text-sm font-bold text-white transition-all duration-200 hover:text-black hover:pl-1";
         return (
           <li key={index}>
             {link.external ? (
@@ -71,99 +74,95 @@ const Footer: React.FC = () => {
 
   return (
     <footer
-      className="relative w-full overflow-hidden text-white mt-[-1px]"
-      style={{
-        background:
-          "linear-gradient(180deg, #0b0f14 0%, #b24f00 45%, #8c3f00 80%, #0b0f14 100%)",
-      }}
+      className="relative w-full overflow-hidden text-white mt-[-1px] bg-[#ea580c]"
     >
-      {/* 🔶 Soft top glow (consistent with other sections) */}
-      <div className="pointer-events-none absolute inset-x-0 -top-6 h-8 bg-gradient-to-b from-[#f57c00]/20 to-transparent" />
+      {/* ------------------------------------------------------
+          TEXTURE LAYER (The "Industrial Paper" Look)
+         ------------------------------------------------------ */}
+      
+      {/* Noise Texture */}
+      <div className="absolute inset-0 opacity-[0.15] mix-blend-multiply pointer-events-none" style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} />
 
-      {/* 🔸 Accent line */}
-      <div className="h-[2px] w-full bg-gradient-to-r from-[#ffd19a]/60 via-white/25 to-transparent" />
-
-      {/* 🔹 Subtle dot texture */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-10"
-        style={{
-          backgroundImage:
-            "radial-gradient(rgba(255,255,255,0.18) 1px, transparent 1px)",
-          backgroundSize: "12px 12px",
-        }}
+      {/* Dot Pattern */}
+      <div 
+        className="absolute inset-0 opacity-[0.1] pointer-events-none"
+        style={{ 
+          backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', 
+          backgroundSize: '24px 24px' 
+        }} 
       />
 
+      {/* Top Hard Border */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-black/10" />
+
       {/* ---- Content ---- */}
-      <div className="relative mx-auto max-w-7xl px-4 py-12">
+      <div className="relative mx-auto max-w-7xl px-6 py-16 lg:py-20">
+        
         {/* Brand + tagline */}
-        <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-1">
-            <h5 className="text-lg font-bold tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]">
-              UTS Bangladeshi Society
+        <div className="mb-16 flex flex-col gap-8 md:flex-row md:items-start md:justify-between border-b-2 border-black/10 pb-12">
+          <div className="space-y-4 max-w-lg">
+            <h5 className="text-3xl md:text-4xl font-black tracking-tight text-white shadow-black drop-shadow-sm">
+              UTS BDSOC
             </h5>
-            <p className="max-w-xl text-sm text-white/90">
-              A welcoming student-led community celebrating Bangladeshi culture at UTS through food, music,
-              dance, and unity. Everyone is invited to join our journey.
+            <p className="text-base font-medium text-black/80 leading-relaxed">
+              A welcoming student-led community celebrating Bangladeshi culture
+              at UTS through food, music, dance, and unity.
             </p>
           </div>
 
-          {/* Social buttons */}
+          {/* Social buttons - White Pill with HARD BLACK SHADOW */}
           <div className="flex flex-wrap items-center gap-3">
-            <a
-              href="mailto:utsbangladeshisoc@gmail.com"
-              className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#b24f00] shadow-[0_8px_30px_rgba(0,0,0,0.25)] transition hover:-translate-y-px hover:shadow-[0_10px_34px_rgba(0,0,0,0.3)]"
-            >
-              Email Us
-            </a>
-            <a
-              href="https://www.instagram.com/utsbdsoc"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-full border border-white/70 bg-white/20 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white hover:text-[#b24f00]"
-            >
-              Instagram
-            </a>
-            <a
-              href="https://discord.gg/wQupZgkK"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-full border border-white/70 bg-white/20 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white hover:text-[#b24f00]"
-            >
-              Discord
-            </a>
+            {[
+              { label: "Email Us", href: "mailto:utsbangladeshisoc@gmail.com" },
+              { label: "Instagram", href: "https://www.instagram.com/utsbdsoc" },
+              { label: "Discord", href: "https://discord.gg/wQupZgkK" }
+            ].map((btn) => (
+              <a
+                key={btn.label}
+                href={btn.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full bg-white px-5 py-2.5 text-sm font-bold text-black shadow-[4px_4px_0px_0px_black] transition-transform hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_black] active:translate-y-0 active:shadow-[2px_2px_0px_0px_black] border-2 border-black"
+              >
+                {btn.label}
+              </a>
+            ))}
           </div>
         </div>
 
         {/* Link sections */}
-        <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-4">
+        <div className="grid gap-12 sm:grid-cols-2 md:grid-cols-4">
           <FooterLinkSection title="Explore" links={explore} />
           <FooterLinkSection title="Our Society" links={ourSociety} />
           <FooterLinkSection title="Get Involved" links={getInvolved} />
           <FooterLinkSection title="Connect" links={connect} />
         </div>
 
-        {/* Divider */}
-        <div className="my-10 h-px w-full bg-gradient-to-r from-transparent via-white/25 to-transparent" />
-
-        {/* Bottom text row */}
-        <div className="flex flex-col items-center justify-between gap-3 text-sm text-white/90 md:flex-row">
-          <p>© {year} UTSBDSOC. All rights reserved.</p>
-          <div className="flex items-center gap-4">
-            <Link href="/privacy-policy" className="hover:text-white transition-colors">
+        {/* Bottom row */}
+        <div className="mt-20 pt-8 border-t-2 border-black/10 flex flex-col-reverse items-center justify-between gap-6 md:flex-row">
+          <p className="text-sm font-bold text-black/60">
+            © {year} UTSBDSOC. All rights reserved.
+          </p>
+          
+          <div className="flex items-center gap-6 text-sm font-bold text-white">
+            <Link href="/privacy-policy" className="hover:text-black hover:underline decoration-2 underline-offset-4 transition-colors">
               Privacy
             </Link>
-            <Link href="/terms" className="hover:text-white transition-colors">
+            <Link href="/terms" className="hover:text-black hover:underline decoration-2 underline-offset-4 transition-colors">
               Terms
             </Link>
-            <Link href="/code-of-conduct" className="hover:text-white transition-colors">
+            <Link href="/code-of-conduct" className="hover:text-black hover:underline decoration-2 underline-offset-4 transition-colors">
               Code of Conduct
             </Link>
           </div>
         </div>
-      </div>
 
-    
+        {/* Giant Watermark (Industrial Touch) */}
+        <div className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 opacity-[0.03] whitespace-nowrap select-none">
+           <span className="text-[150px] font-black text-black leading-none">UTSBDSOC</span>
+        </div>
+
+      </div>
     </footer>
   );
 };

@@ -5,7 +5,6 @@ import Link from "next/link";
 type Highlight = {
   title: string;
   date: string;
-  stats?: string;
   href: string;
   image: string;
   tags?: string[];
@@ -35,114 +34,120 @@ const HIGHLIGHTS: Highlight[] = [
   },
 ];
 
-const Chip: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <span className="inline-flex items-center rounded-full border border-white/25 bg-white/10 px-2.5 py-1 text-[11px] font-medium text-white/90">
-    {children}
-  </span>
-);
-
 export default function PastHighlights() {
   return (
     <section
-      className="relative overflow-hidden text-white mt-[-1px]" // eliminate seam
-      style={{
-        // 🖤 Same gradient logic as Events: deep dark neutral base
-        background: "linear-gradient(180deg, #0b0f14 0%, #10161d 55%, #0b0f14 100%)",
-      }}
+      className="relative overflow-hidden text-white mt-[-1px] py-24"
+      style={{ background: "#0b0f14" }}
       aria-labelledby="past-highlights"
     >
-      {/* 🔶 Top soft orange glow */}
-      <div className="pointer-events-none absolute inset-x-0 -top-6 h-8 bg-gradient-to-b from-[#f57c00]/18 to-transparent" />
+      {/* ------------------------------------------------------
+          TEXTURE & PATTERN LAYER
+         ------------------------------------------------------ */}
+      
+      {/* Noise Texture */}
+      <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} />
 
-      {/* 🔸 Thin top accent line */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#ffcc80]/30 via-white/15 to-transparent" />
-
-      {/* 🔹 Dotted texture overlay */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-10"
-        style={{
-          backgroundImage: "radial-gradient(rgba(255,255,255,0.18) 1px, transparent 1px)",
-          backgroundSize: "12px 12px",
-        }}
+      {/* Subtle Grid Pattern */}
+      <div 
+        className="absolute inset-0 opacity-[0.1] pointer-events-none"
+        style={{ 
+          backgroundImage: 'linear-gradient(to right, #333 1px, transparent 1px), linear-gradient(to bottom, #333 1px, transparent 1px)', 
+          backgroundSize: '40px 40px' 
+        }} 
       />
 
-      {/* 🔸 Bottom fade (for smooth flow to next section) */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-black/50" />
+      {/* Top Line Accent */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-white/10" />
 
       {/* --- MAIN CONTENT --- */}
-      <div className="relative mx-auto max-w-7xl px-4 py-14 md:py-20">
-        <div className="mb-8 flex items-end justify-between gap-4 flex-wrap">
-          <h2
-            id="past-highlights"
-            className="text-3xl md:text-4xl font-extrabold tracking-tight drop-shadow-[0_2px_10px_rgba(255,122,26,0.18)]"
-          >
-            Past Event Highlights
-          </h2>
+      <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
+        
+        {/* HEADER SECTION */}
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-12 gap-6">
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-3 mb-4">
+               <span className="h-[2px] w-12 bg-[#ea580c]"></span>
+               <span className="text-xs font-bold uppercase tracking-[0.2em] text-white/60">
+                 Throwback
+               </span>
+            </div>
+            <h2
+              id="past-highlights"
+              className="text-3xl md:text-4xl font-black tracking-tight text-white"
+            >
+              Past Event <span className="text-[#ea580c]">Highlights</span>
+            </h2>
+          </div>
+          
           <Link
             href="https://www.instagram.com/utsbdsoc"
             target="_blank"
-            className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#f57c00] shadow-[0_8px_30px_rgba(0,0,0,0.25)] transition hover:-translate-y-px hover:shadow-[0_10px_34px_rgba(0,0,0,0.3)]"
+            className="group inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-black shadow-[4px_4px_0px_0px_#ea580c] transition-transform hover:-translate-y-1 active:translate-y-0 active:shadow-none"
           >
+            <svg className="w-4 h-4 text-[#ea580c]" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
             View on Instagram
           </Link>
         </div>
 
         {/* CARD GRID */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {HIGHLIGHTS.map((h, i) => (
             <article
               key={i}
-              className="group relative overflow-hidden rounded-2xl border border-white/20 bg-[linear-gradient(180deg,#2a1709_0%,#171b21_35%,#0f1319_70%,#0b0f14_100%)] backdrop-blur-[2px] shadow-[0_0_24px_rgba(0,0,0,0.25)] transition-transform hover:-translate-y-0.5"
+              className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#121212] transition-all duration-300 hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_#ea580c] hover:border-white/30"
             >
-              {/* glow + ring */}
-              <div className="pointer-events-none absolute inset-0 rounded-2xl">
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#ff7a1a]/25 via-transparent to-white/10 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />
-                <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/12" />
-              </div>
-
-              {/* image */}
-              <div className="relative">
-                <div className="aspect-[16/9] w-full">
-                  <Image
-                    src={h.image}
-                    alt={h.title}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 33vw"
-                    className="object-cover transition-transform duration-700 will-change-transform group-hover:scale-[1.03]"
-                  />
+              
+              {/* Image Section */}
+              <div className="relative aspect-[16/10] w-full overflow-hidden border-b border-white/10">
+                <Image
+                  src={h.image}
+                  alt={h.title}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 33vw"
+                  className="object-cover transition-transform duration-700 will-change-transform group-hover:scale-110 grayscale hover:grayscale-0"
+                />
+                {/* Date Badge (Industrial Style) */}
+                <div className="absolute top-4 left-4 bg-white text-black px-3 py-1 text-xs font-bold uppercase tracking-wider shadow-lg">
+                  {h.date}
                 </div>
               </div>
 
-              {/* content */}
-              <div className="relative z-10 space-y-3 p-5">
-                <h3 className="text-xl font-extrabold tracking-tight">{h.title}</h3>
-                <p className="text-sm text-white/85">{h.date}</p>
+              {/* Content Section */}
+              <div className="flex flex-1 flex-col p-6">
+                <h3 className="text-xl font-black tracking-tight text-white mb-2 group-hover:text-[#ea580c] transition-colors">
+                  {h.title}
+                </h3>
 
-                {h.tags?.length ? (
-                  <div className="flex flex-wrap gap-2">
-                    {h.tags.map((t, idx) => (
-                      <Chip key={idx}>{t}</Chip>
-                    ))}
-                  </div>
-                ) : null}
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {h.tags?.map((t, idx) => (
+                    <span 
+                      key={idx} 
+                      className="inline-flex items-center rounded px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-gray-400 border border-white/10 bg-[#1a1a1a]"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
 
-                <div className="pt-1">
+                {/* Link Button */}
+                <div className="mt-auto pt-4 border-t border-white/5">
                   <Link
                     href={h.href}
                     target="_blank"
-                    className="inline-flex items-center rounded-full border border-white/60 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white hover:text-[#f57c00]"
+                    className="inline-flex items-center text-sm font-bold text-white transition-colors hover:text-[#ea580c]"
                   >
-                    View Photos
+                    See Post
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="ml-2 h-4 w-4"
-                      viewBox="0 0 24 24"
+                      className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"
                       fill="none"
+                      viewBox="0 0 24 24"
                       stroke="currentColor"
-                      strokeWidth={2}
+                      strokeWidth={2.5}
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                     </svg>
                   </Link>
                 </div>
@@ -151,8 +156,6 @@ export default function PastHighlights() {
           ))}
         </div>
 
-        {/* Divider */}
-        <div className="mt-12 h-px w-full bg-gradient-to-r from-transparent via-white/25 to-transparent" />
       </div>
     </section>
   );

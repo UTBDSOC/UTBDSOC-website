@@ -41,7 +41,7 @@ export default function SonarBanglaLoader() {
       }}
       className={twMerge(
         "relative grid min-h-screen w-full place-content-center overflow-hidden",
-        "bg-gradient-to-br",
+        "bg-background",
         palette.bgFrom,
         palette.bgVia,
         palette.bgTo
@@ -50,8 +50,8 @@ export default function SonarBanglaLoader() {
     >
       {/* Lightweight radial vignettes (no blur filters) */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 [background:radial-gradient(60%_60%_at_50%_40%,rgba(255,140,0,.14),transparent_55%)]" />
-        <div className="absolute inset-0 [background:radial-gradient(100%_100%_at_50%_50%,transparent_65%,rgba(0,0,0,.5)_100%)]" />
+        <div className="absolute inset-0 bg-transparent" />
+        <div className="absolute inset-0 bg-transparent" />
       </div>
 
       {/* Big animated bilingual headline */}
@@ -366,27 +366,13 @@ const Card = React.memo(function Card({
 /* ---------- Very light “smoke” using SVG (no blur) ---------- */
 function LightweightSmoke() {
   return (
-    <svg
-      className="pointer-events-none absolute inset-0 z-30"
-      viewBox="0 0 100 100"
-      preserveAspectRatio="none"
-    >
+    <svg className="absolute w-full h-full">
       <defs>
-        <linearGradient id="sm1" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor="rgba(255,255,255,.12)" />
-          <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-        </linearGradient>
+      <linearGradient id="sm1" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stopColor="#10B981" />
+        <stop offset="100%" stopColor="#10B981" />
+      </linearGradient>
       </defs>
-      <motion.path
-        d="M5,70 C20,50 40,80 55,60 C70,40 85,55 95,35"
-        fill="none"
-        stroke="url(#sm1)"
-        strokeWidth="6"
-        style={{ filter: "none" }}
-        initial={{ pathLength: 0.7, opacity: 0.6 }}
-        animate={{ pathLength: [0.6, 0.9, 0.6] }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-      />
     </svg>
   );
 }

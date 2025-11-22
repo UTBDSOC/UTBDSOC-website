@@ -150,7 +150,7 @@ export default function TeamGrid({
             >
               <div className="relative aspect-[16/12] overflow-hidden">
                 <img src={m.headshot} alt={m.name} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+                <div className="absolute inset-0 bg-black/10" />
               </div>
               <div className="p-4 md:p-5">
                 <h3 className="text-lg md:text-xl font-semibold text-orange-100">{m.name}</h3>

@@ -67,3 +67,32 @@ export function useBodyScrollLock(active: boolean) {
     return () => { document.body.style.overflow = original; };
   }, [active]);
 }
+
+/** image resolver: prefer local /public/events assets when appropriate */
+export function resolveEventImage(e: EventItem): string {
+  const title = e.title.toLowerCase();
+  const tags = (e.tags || []).map((t) => t.toLowerCase());
+
+  // Keyword to local image mappings
+  if (title.includes("game") || tags.includes("games")) {
+    return "/events/GamesNight.jpg";
+  }
+  if (title.includes("futsal") || title.includes("sports") || tags.includes("sports")) {
+    return "/events/zuhayrsoccer-17.jpg";
+  }
+  if (title.includes("eid") || title.includes("chaand") || title.includes("chaad")) {
+    return "/events/chaadraatutsbdsoc-176.jpg";
+  }
+  if (title.includes("shonar") || title.includes("boishakh") || tags.includes("cultural")) {
+    return "/events/PHOTOLIA_-271.jpg";
+  }
+  if (title.includes("film") || title.includes("movie")) {
+    return "/events/PHOTOLIA_-181.jpg";
+  }
+  if (tags.includes("food")) {
+    return "/events/PHOTOLIA_-196.jpg";
+  }
+
+  // Default fallback to first known local image
+  return "/events/PHOTOLIA_-125.jpg";
+}

@@ -176,7 +176,7 @@ export default function EventsPage() {
             <FeaturedEventBanner event={featured} />
           </div>
         )}
-      <main className="min-h-screen pt-20 md:pt-24 bg-gradient-to-b from-[#0b0f14] via-[#0d131b] to-[#101820] text-orange-50">
+      <main className="min-h-screen pt-20 md:pt-24 bg-[#0b0f14] text-orange-50">
         {/* Hero */}
         <section className="px-4 md:px-8 py-6 md:py-10 border-b border-white/10">
           <div className="mx-auto max-w-6xl">

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { EventItem } from "./events.types";
-import { formatDT, googleCalLink, useCountdown } from "./events.utils";
+import { formatDT, googleCalLink, useCountdown, resolveEventImage } from "./events.utils";
 
 export default function FeaturedEventBanner({ event }: { event: EventItem }) {
   const left = useCountdown(event.startISO);
@@ -10,7 +10,7 @@ export default function FeaturedEventBanner({ event }: { event: EventItem }) {
   return (
     <section className="relative mx-auto max-w-6xl overflow-hidden rounded-3xl border border-white/10">
       <div className="absolute inset-0">
-        <img src={event.image} alt={event.title} className="h-full w-full object-cover" />
+        <img src={resolveEventImage(event)} alt={event.title} className="h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/20" />
       </div>
 

@@ -1,74 +1,60 @@
-// app/components/Hero.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 
+// Updated to the new "Director" Palette
 const colors = {
-  brand: "#ff7a1a",
-  ringDim: "stroke-[#ffa45c]/30",
-  surface: "bg-[#151a20]",
+  brand: "#ea580c", // The new deep orange
+  ringDim: "stroke-[#ea580c]/30", // Dimmed orange for ring track
+  surface: "bg-[#0a0a0a]", // Deepest black
 };
 
 const Hero: React.FC = () => {
   const prefersReduced = useReducedMotion();
 
   return (
-    <div className="relative min-h-[100svh] overflow-hidden text-neutral-200">
-      {/* ===== FADED STAGE BACKGROUND ===== */}
+    <div className="relative min-h-[100svh] overflow-hidden text-neutral-200 bg-black">
+      
+      {/* ===== FADED STAGE BACKGROUND (Your Original) ===== */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/desiball-stage.jpg" // make sure this path exists in /public
+          src="/desiball-stage.jpg"
           alt="UTSBDSOC Stage Background"
           fill
           priority
           className={`
             object-cover
             [object-position:center_35%]
-            opacity-70
-            saturate-90
-            contrast-105
+            opacity-60
+            saturate-0
+            contrast-125
           `}
         />
-        {/* green/gold wash */}
-        <div
-          className={`
-            absolute inset-0
-            bg-[radial-gradient(60%_50%_at_50%_25%,rgba(17,44,33,0.28)_0%,rgba(8,14,12,0)_55%)]
-            mix-blend-multiply
-            pointer-events-none
-          `}
-        />
-        {/* vertical fade */}
-        <div
-          className={`
-            absolute inset-0
-            bg-gradient-to-b from-black/15 via-transparent to-black/35
-            pointer-events-none
-          `}
-        />
-        {/* vignette */}
-        <div
-          className={`
-            absolute inset-0
-            bg-[radial-gradient(circle_at_center,rgba(0,0,0,0)_60%,rgba(0,0,0,0.45)_100%)]
-            pointer-events-none
-          `}
-        />
+        {/* Orange/Warm wash to tie it together */}
+        <div className="absolute inset-0 bg-[#ea580c]/10 mix-blend-overlay pointer-events-none" />
+        
+        {/* Vertical fade to black */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/90 pointer-events-none" />
+        
+        {/* Texture overlay (Optional: keeps it consistent with other sections without ruining your look) */}
+        <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} />
       </div>
 
-      {/* ===== CONTENT (floaters removed) ===== */}
+      {/* ===== CONTENT ===== */}
       <div className="relative z-10 mx-auto max-w-7xl min-h-[100svh] grid grid-cols-1 md:grid-cols-2 items-center">
+        
         {/* LEFT: HELLO + AnimatedText */}
-        <div className="flex items-center justify-center p-6 md:p-8">
+        <div className="flex items-center justify-center p-6 md:p-8 order-2 md:order-1">
           <div className="w-full max-w-3xl">
             <div className="relative inline-block">
               <motion.h1
                 initial={{ opacity: 0, x: -40 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.7, ease: "easeOut" }}
-                className="font-extrabold leading-none text-7xl md:text-[8rem] lg:text-[10rem] tracking-tight shimmer-text"
+                // Added drop-shadow to pop against the new orange theme
+                className="font-extrabold leading-none text-7xl md:text-[8rem] lg:text-[10rem] tracking-tight shimmer-text drop-shadow-2xl"
               >
                 HELLO
               </motion.h1>
@@ -86,10 +72,10 @@ const Hero: React.FC = () => {
           </div>
         </div>
 
-        {/* RIGHT: Circular Logo */}
-        <div className="flex items-center justify-center p-6 md:p-8">
+        {/* RIGHT: Circular Logo (Your Original Orbit) */}
+        <div className="flex items-center justify-center p-6 md:p-8 order-1 md:order-2">
           <div
-            className={`relative rounded-full flex items-center justify-center overflow-hidden ${colors.surface} border-4 shadow-[0_0_60px_rgba(255,122,26,.15)]`}
+            className={`relative rounded-full flex items-center justify-center overflow-hidden ${colors.surface} border-4 shadow-[0_0_80px_rgba(234,88,12,0.25)]`}
             style={{ width: "90%", maxWidth: "620px", aspectRatio: "1 / 1", borderColor: colors.brand }}
           >
             {!prefersReduced && <LogoOrbitRing />}
@@ -99,58 +85,49 @@ const Hero: React.FC = () => {
               width={800}
               height={800}
               priority
-              className="object-contain p-6"
+              className="object-contain p-6 z-10"
             />
           </div>
         </div>
       </div>
 
       {/* Bottom CTAs */}
-      <div className="absolute left-0 right-0 bottom-4 px-4 pb-[env(safe-area-inset-bottom)] md:bottom-8 md:px-0 flex justify-center z-20">
-        <div className="w-full max-w-md flex flex-col gap-3 md:max-w-none md:w-auto md:flex-row md:gap-4">
+      <div className="absolute left-0 right-0 bottom-8 px-4 pb-[env(safe-area-inset-bottom)] md:bottom-12 md:px-0 flex justify-center z-20">
+        <div className="w-full max-w-md flex flex-col gap-3 md:max-w-none md:w-auto md:flex-row md:gap-6">
+          
+          {/* Events Button: Updated to match the "Hard Shadow" theme but kept your shape */}
           <a
             href="/events"
-            className="relative font-semibold rounded-2xl shadow-lg transition bg-[#ff7a1a] text-black w-full py-4 text-base md:w-auto md:px-7 md:py-3.5 md:text-sm hover:translate-y-[-1px] hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#ff7a1a]/35 transform-gpu btn-pulse text-center"
+            className="relative font-bold rounded-2xl bg-[#ea580c] text-white w-full py-4 text-base md:w-auto md:px-8 md:py-3.5 md:text-lg transition-transform hover:-translate-y-1 shadow-[4px_4px_0px_0px_white] active:translate-y-0 active:shadow-[2px_2px_0px_0px_white] text-center"
           >
             Events
           </a>
+          
+          {/* Membership Button */}
           <a
             href="https://www.activateuts.com.au/clubs/bangladeshi-society"
-            className="relative font-semibold rounded-2xl transition border border-[#ff7a1a] text-[#ff7a1a] bg-white/0 w-full py-4 text-base md:w-auto md:px-7 md:py-3.5 md:text-sm hover:bg-[#ff7a1a] hover:text-black hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#ff7a1a]/35 transform-gpu text-center"
+            className="relative font-bold rounded-2xl bg-black border-2 border-white text-white w-full py-4 text-base md:w-auto md:px-8 md:py-3.5 md:text-lg transition-colors hover:bg-white hover:text-black text-center"
           >
             Membership
           </a>
         </div>
       </div>
 
-      {/* Global styles */}
+      {/* Global styles (Kept your original shimmer, just tweaked color to match) */}
       <style jsx global>{`
         .shimmer-text {
           color: transparent;
-          background-image: linear-gradient(90deg, #b2b874 0%, #f8f8f8 50%, #b2b874 100%);
+          /* Shimmer from White to Orange-White */
+          background-color: #ffffff;
+          background-image: linear-gradient(90deg, #ffffff 0%, #fdba74 50%, #ffffff 100%);
           background-size: 200% 100%;
           -webkit-background-clip: text;
           background-clip: text;
-          animation: shimmer 3.5s ease-in-out infinite;
+          animation: shimmer 4s ease-in-out infinite;
         }
         @keyframes shimmer {
           0% { background-position: 200% 0; }
-          50% { background-position: 100% 0; }
           100% { background-position: 0% 0; }
-        }
-        .btn-pulse::after {
-          content: "";
-          position: absolute;
-          inset: -6px;
-          border-radius: 9999px;
-          pointer-events: none;
-          animation: btnpulse 1.8s ease-in-out infinite;
-          box-shadow: 0 0 0 rgba(255, 122, 26, 0);
-        }
-        @keyframes btnpulse {
-          0% { transform: scale(1); opacity: 0.35; }
-          70% { transform: scale(1.15); opacity: 0; }
-          100% { transform: scale(1.15); opacity: 0; }
         }
       `}</style>
     </div>
@@ -188,10 +165,11 @@ const AnimatedText: React.FC<{
             animate={isActive ? "active" : "inactive"}
             variants={{ active: { opacity: 1, y: 0, scale: 1 }, inactive: { opacity: 0, y: 16, scale: 0.98 } }}
             transition={{ duration: 0.35, ease: "easeOut" }}
-            className={["absolute font-bold", fontSizeClasses, "drop-shadow-[0_2px_12px_rgba(0,0,0,.45)] tracking-tight shimmer-text"].join(" ")}
+            className={["absolute font-bold text-white", fontSizeClasses, "drop-shadow-lg tracking-tight shimmer-text"].join(" ")}
           >
             {phrase.toUpperCase()}
-            <span className={["block h-1 mt-3 rounded-full", lineWidthClass, "bg-[#b2b874]/80"].join(" ")} />
+            {/* Underline bar updated to Orange */}
+            <span className={["block h-1.5 mt-3 rounded-full", lineWidthClass, "bg-[#ea580c] shadow-[2px_2px_0px_0px_white]"].join(" ")} />
           </motion.div>
         );
       })}
@@ -203,8 +181,9 @@ const LogoOrbitRing: React.FC = () => (
   <svg className="absolute inset-0" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden>
     <defs>
       <linearGradient id="ringGrad" x1="0" x2="1" y1="0" y2="1">
-        <stop offset="0%" stopColor="#ff7a1a" stopOpacity="0.9" />
-        <stop offset="100%" stopColor="#ff7a1a" stopOpacity="0.1" />
+        {/* Updated Gradient to New Orange */}
+        <stop offset="0%" stopColor="#ea580c" />
+        <stop offset="100%" stopColor="#fff" stopOpacity="0.5" />
       </linearGradient>
     </defs>
     <circle cx="50" cy="50" r="44" className={colors.ringDim} strokeWidth="1.5" fill="none" />

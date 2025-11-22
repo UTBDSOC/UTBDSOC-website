@@ -1,10 +1,18 @@
 "use client";
+
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion, useSpring, useMotionTemplate } from "framer-motion";
 
-export type EventStatus = "UPCOMING" | "LIMITED" | "SOLD_OUT" | "CANCELLED" | "LIVE" | "ENDED";
+/* ---------- TYPES ---------- */
+export type EventStatus =
+  | "UPCOMING"
+  | "LIMITED"
+  | "SOLD_OUT"
+  | "CANCELLED"
+  | "LIVE"
+  | "ENDED";
 
 export interface EventCardProps {
   title: string;
@@ -20,7 +28,7 @@ export interface EventCardProps {
   buttonLink: string;
   hoverTilt?: boolean;
   cardBgClassName?: string;
-  layout?: "image-left" | "image-right" | "vertical";
+  layout?: "image-left" | "image-right" | "featured";
   featured?: boolean;
   capacityUsed?: number;
   capacityTotal?: number;
@@ -29,59 +37,130 @@ export interface EventCardProps {
   enableSeoJsonLd?: boolean;
 }
 
-/* ---------- utils ---------- */
-function formatDateRange(startISO: string, endISO?: string) {
+/* ---------- UTILS ---------- */
+function getMonthAndDay(iso: string) {
+  const d = new Date(iso);
+  return {
+    month: d.toLocaleString("en-AU", { month: "short" }).toUpperCase(),
+    day: d.getDate(),
+  };
+}
+
+function formatTimeRange(startISO: string, endISO?: string) {
   const start = new Date(startISO);
   const end = endISO ? new Date(endISO) : undefined;
-  const optsDate: Intl.DateTimeFormatOptions = { weekday: "short", day: "numeric", month: "short", year: "numeric", timeZone: "Australia/Sydney" };
-  const optsTime: Intl.DateTimeFormatOptions = { hour: "numeric", minute: "2-digit", timeZone: "Australia/Sydney" };
-  const dateFmt = new Intl.DateTimeFormat("en-AU", optsDate);
-  const timeFmt = new Intl.DateTimeFormat("en-AU", optsTime);
-  if (end && start.toDateString() === end.toDateString()) return `${dateFmt.format(start)} • ${timeFmt.format(start)}–${timeFmt.format(end)}`;
-  if (end) return `${dateFmt.format(start)} ${timeFmt.format(start)} → ${dateFmt.format(end)} ${timeFmt.format(end)}`;
-  return `${dateFmt.format(start)} • ${timeFmt.format(start)}`;
+  const opts: Intl.DateTimeFormatOptions = {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "Australia/Sydney",
+  };
+  const fmt = new Intl.DateTimeFormat("en-AU", opts);
+  if (end) return `${fmt.format(start)} – ${fmt.format(end)}`;
+  return fmt.format(start);
 }
 
 function useCountdown(targetISO: string) {
-  const [now, setNow] = useState(() => new Date());
-  useEffect(() => { const id = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(id); }, []);
+  const [now, setNow] = useState<Date | null>(null);
+  useEffect(() => {
+    setNow(new Date());
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
   const target = useMemo(() => new Date(targetISO), [targetISO]);
+  if (!now) return { days: 0, hours: 0, minutes: 0, seconds: 0, past: false, pending: true } as const;
   const diff = target.getTime() - now.getTime();
   const past = diff <= 0;
   const total = Math.max(diff, 0);
-  const days = Math.floor(total / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((total / (1000 * 60 * 60)) % 24);
-  const minutes = Math.floor((total / (1000 * 60)) % 60);
-  const seconds = Math.floor((total / 1000) % 60);
-  return { days, hours, minutes, seconds, past };
+  return {
+    days: Math.floor(total / (1000 * 60 * 60 * 24)),
+    hours: Math.floor((total / (1000 * 60 * 60)) % 24),
+    minutes: Math.floor((total / (1000 * 60)) % 60),
+    seconds: Math.floor((total / 1000) % 60),
+    past,
+    pending: false,
+  } as const;
 }
 
-function makeICS({ title, description, location, startISO, endISO }: { title: string; description: string; location: string; startISO: string; endISO?: string; }) {
+function makeICS({
+  title,
+  description,
+  location,
+  startISO,
+  endISO,
+}: {
+  title: string;
+  description: string;
+  location: string;
+  startISO: string;
+  endISO?: string;
+}) {
   const uid = `${crypto.randomUUID()}@utsbdsoc`;
   const dtStart = new Date(startISO);
-  const dtEnd = endISO ? new Date(endISO) : new Date(dtStart.getTime() + 2 * 60 * 60 * 1000);
-  const toICS = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
+  const dtEnd = endISO
+    ? new Date(endISO)
+    : new Date(dtStart.getTime() + 2 * 60 * 60 * 1000);
+
+  const toICS = (d: Date) =>
+    d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
+
   const ics = [
-    "BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//UTSBDSOC//Event//EN","CALSCALE:GREGORIAN","METHOD:PUBLISH","BEGIN:VEVENT",
-    `UID:${uid}`,`DTSTAMP:${toICS(new Date())}`,`DTSTART:${toICS(dtStart)}`,`DTEND:${toICS(dtEnd)}`,
-    `SUMMARY:${title}`,`DESCRIPTION:${description.replace(/\n/g, "\\n")}`,`LOCATION:${location}`,
-    "END:VEVENT","END:VCALENDAR",
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//UTSBDSOC//Event//EN",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    "BEGIN:VEVENT",
+    `UID:${uid}`,
+    `DTSTAMP:${toICS(new Date())}`,
+    `DTSTART:${toICS(dtStart)}`,
+    `DTEND:${toICS(dtEnd)}`,
+    `SUMMARY:${title}`,
+    `DESCRIPTION:${description.replace(/\n/g, "\\n")}`,
+    `LOCATION:${location}`,
+    "END:VEVENT",
+    "END:VCALENDAR",
   ].join("\r\n");
+
   const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
   return URL.createObjectURL(blob);
 }
 
-/** ---------- STATUS CHIPS tuned for dark card ---------- */
-const statusChip: Record<EventStatus, string> = {
-  UPCOMING:  "text-white border-white/15 bg-white/10",
-  LIMITED:   "text-amber-200 border-amber-200/20 bg-amber-200/10",
-  LIVE:      "text-emerald-200 border-emerald-200/20 bg-emerald-200/10",
-  SOLD_OUT:  "text-white/85 border-white/12 bg-white/5",
-  CANCELLED: "text-red-200 border-red-200/20 bg-red-200/10",
-  ENDED:     "text-white/70 border-white/10 bg-white/5",
+/* ---------- ICONS ---------- */
+const Icons = {
+  MapPin: (props: any) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  ),
+  Clock: (props: any) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
+    </svg>
+  ),
+  Share: (props: any) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" />
+      <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
+    </svg>
+  ),
 };
 
-/* ---------- component (orange → dark flow + animations) ---------- */
+/* ---------- STATUS STYLES ---------- */
+const statusConfig: Record<EventStatus, { text: string; color: string }> = {
+  UPCOMING: { text: "UPCOMING", color: "bg-[#1e40af] text-white border-[#1e3a8a]" },
+  LIMITED: { text: "LIMITED SPOTS", color: "bg-[#b45309] text-white border-[#92400e]" },
+  LIVE: { text: "LIVE NOW", color: "bg-[#047857] text-white border-[#065f46]" },
+  SOLD_OUT: { text: "SOLD OUT", color: "bg-[#374151] text-gray-300 border-[#1f2937]" },
+  CANCELLED: { text: "CANCELLED", color: "bg-[#991b1b] text-white border-[#7f1d1d]" },
+  ENDED: { text: "ENDED", color: "bg-[#262626] text-white/40 border-[#171717]" },
+};
+
 const EventCard: React.FC<EventCardProps> = ({
   title,
   tags = [],
@@ -95,8 +174,7 @@ const EventCard: React.FC<EventCardProps> = ({
   buttonText,
   buttonLink,
   hoverTilt = true,
-  // warm/orange-tinted top -> deep dark
-  cardBgClassName = "bg-[linear-gradient(180deg,#2a1709_0%,#171b21_35%,#0f1319_70%,#0b0f14_100%)]",
+  cardBgClassName,
   layout = "image-right",
   featured = false,
   capacityUsed,
@@ -107,263 +185,247 @@ const EventCard: React.FC<EventCardProps> = ({
 }) => {
   const [icsUrl, setIcsUrl] = useState<string | null>(null);
   const [imgError, setImgError] = useState(false);
-  const [tilt, setTilt] = useState({ rx: 0, ry: 0, s: 1 });
   const cardRef = useRef<HTMLDivElement | null>(null);
   const prefersReducedMotion = useReducedMotion();
   const cd = useCountdown(startISO);
 
-  // mobile / coarse pointer = disable tilt
-  const [canTilt, setCanTilt] = useState(false);
-  useEffect(() => {
-    const coarse = window.matchMedia?.("(pointer: coarse)").matches;
-    setCanTilt(!coarse && hoverTilt);
-  }, [hoverTilt]);
+  // Tilt Logic (Only for non-featured cards)
+  const mouseX = useSpring(0, { stiffness: 500, damping: 100 });
+  const mouseY = useSpring(0, { stiffness: 500, damping: 100 });
+
+  const isFeaturedLayout = featured || layout === "featured";
+  const isReversed = layout === "image-left";
+
+  function onMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
+    if (isFeaturedLayout || !hoverTilt || prefersReducedMotion) return;
+    const { left, top, width, height } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left - width / 2);
+    mouseY.set(clientY - top - height / 2);
+  }
+  
+  function onMouseLeave() {
+    if (isFeaturedLayout || !hoverTilt || prefersReducedMotion) return;
+    mouseX.set(0);
+    mouseY.set(0);
+  }
+
+  const transform = useMotionTemplate`perspective(1000px) rotateX(${useSpring(useMotionTemplate`${mouseY} / -20`)}deg) rotateY(${useSpring(useMotionTemplate`${mouseX} / 20`)}deg)`;
 
   useEffect(() => {
     if (!icsUrl) setIcsUrl(makeICS({ title, description, location, startISO, endISO }));
     return () => { if (icsUrl) URL.revokeObjectURL(icsUrl); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // desktop tilt
-  useEffect(() => {
-    const node = cardRef.current;
-    if (!node || !canTilt) return;
-    const handle = (e: MouseEvent) => {
-      const r = node.getBoundingClientRect();
-      const px = (e.clientX - r.left) / r.width - 0.5;
-      const py = (e.clientY - r.top) / r.height - 0.5;
-      setTilt({
-        rx: py * -6, // rotateX
-        ry: px * 6,  // rotateY
-        s: 1.005,
-      });
-    };
-    const leave = () => setTilt({ rx: 0, ry: 0, s: 1 });
-    node.addEventListener("mousemove", handle);
-    node.addEventListener("mouseleave", leave);
-    return () => {
-      node.removeEventListener("mousemove", handle);
-      node.removeEventListener("mouseleave", leave);
-    };
-  }, [canTilt]);
+  const { month, day } = getMonthAndDay(startISO);
+  const limitedPct = status === "LIMITED" && capacityUsed != null && capacityTotal ? Math.max(0, Math.min(100, Math.round((capacityUsed / capacityTotal) * 100))) : null;
+  const computedStatus: EventStatus = status ?? (!cd.past ? "UPCOMING" : (endISO && new Date() > new Date(endISO) ? "ENDED" : "LIVE"));
+  
+  // Framer Variants
+  const containerVar = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { staggerChildren: 0.1 } } };
+  const itemVar = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } };
 
-  const limitedPct =
-    status === "LIMITED" && capacityUsed != null && capacityTotal
-      ? Math.max(0, Math.min(100, Math.round((capacityUsed / capacityTotal) * 100)))
-      : null;
+  // --- DYNAMIC STYLES ---
+  // Featured Layout = Transparent, No Border, No Shadow (Seamless)
+  // Standard Layout = Boxed, Border, Shadow (Card)
+  const wrapperClasses = isFeaturedLayout
+    ? "w-full max-w-7xl p-0 border-b-2 border-[#ea580c] pb-12 mb-12"
+    : `group relative mx-auto rounded-3xl border border-white/10 bg-[#121212] shadow-[0_0_0_1px_rgba(255,255,255,0.05)] w-full max-w-5xl p-1 hover:border-white/20 ${cardBgClassName || ""}`;
 
-  const isImageLeft = layout === "image-left";
-  const mediaOrder = isImageLeft ? "md:order-1" : "md:order-2";
-  const textOrder = isImageLeft ? "md:order-2" : "md:order-1";
-  const statusForChip: EventStatus = status ?? (!cd.past ? "UPCOMING" : endISO && new Date() > new Date(endISO) ? "ENDED" : "LIVE");
-
-  /* --------- framer motion variants --------- */
-  const spring = { type: "spring", stiffness: 120, damping: 18, mass: 0.6 };
-  const fadeUp: any = {
-    hidden: { opacity: 0, y: 18 },
-    show: { opacity: 1, y: 0, transition: prefersReducedMotion ? ({ duration: 0.2 } as any) : ({ ...spring } as any) },
-  };
-  const fade: any = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: prefersReducedMotion ? ({ duration: 0.2 } as any) : ({ duration: 0.5 } as any) },
-  };
-  const stagger: any = prefersReducedMotion ? {} : { staggerChildren: 0.06, delayChildren: 0.05 };
+  const innerClasses = isFeaturedLayout
+    ? "relative lg:grid lg:grid-cols-12 lg:gap-16 lg:items-start"
+    : `relative flex flex-col gap-6 overflow-hidden rounded-[20px] bg-[#141414] p-6 md:p-8 ${isReversed ? "md:flex-row-reverse" : "md:flex-row"}`;
 
   return (
     <motion.article
       ref={cardRef}
       initial="hidden"
       whileInView="show"
-      viewport={{ amount: 0.15, once: true }}
-      variants={fadeUp}
-      className={[
-        "relative mx-auto max-w-5xl group will-change-transform",
-        "rounded-2xl border border-white/10",
-        cardBgClassName,
-        featured ? "p-8 md:p-12" : "p-6 md:p-8",
-        "text-white",
-        "shadow-[0_10px_30px_rgba(0,0,0,0.45)]",
-      ].join(" ")}
-      style={canTilt ? { transform: `perspective(900px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg) scale(${tilt.s})`, transition: "transform 120ms ease-out" } : undefined}
+      viewport={{ amount: 0.2, once: true }}
+      variants={containerVar}
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
+      style={!isFeaturedLayout && hoverTilt && !prefersReducedMotion ? { transform, transformStyle: "preserve-3d" } : undefined}
+      className={`text-white transition-all duration-500 ${wrapperClasses}`}
       itemScope
       itemType="https://schema.org/Event"
     >
-      {/* Orange halo at the very top */}
-      <div className="pointer-events-none absolute inset-x-0 -top-1 h-10 rounded-t-2xl bg-gradient-to-b from-[#f57c00]/22 via-transparent to-transparent" />
+      {/* Texture Overlay (Only for Boxed cards) */}
+      {!isFeaturedLayout && (
+        <div className="absolute inset-0 rounded-3xl opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} />
+      )}
 
-      {/* Subtle ring + faint orange edge glow */}
-      <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10 [box-shadow:0_0_0_1px_rgba(255,122,26,0.06),0_20px_60px_rgba(0,0,0,0.35)]" />
-
-      <motion.div
-        className="relative z-10 flex flex-col md:flex-row md:items-stretch md:space-x-8 space-y-6 md:space-y-0"
-        variants={stagger as any}
-      >
-        {/* TEXT */}
-        <motion.div className={`flex-1 space-y-5 ${textOrder}`} variants={fadeUp}>
-          <header className="space-y-3">
-            <motion.h2 className="text-3xl md:text-4xl font-extrabold tracking-tight" itemProp="name" variants={fade}>
-              {title}
-            </motion.h2>
-
-            {!cd.past && (
-              <motion.div className="text-xs text-white/80" suppressHydrationWarning variants={fade}>
-                Starts in {cd.days}d {cd.hours}h {cd.minutes}m {cd.seconds}s
-              </motion.div>
-            )}
-
-            <motion.p className="text-sm text-white/85" itemProp="startDate" content={startISO} variants={fade}>
-              {formatDateRange(startISO, endISO)}
-            </motion.p>
-
-            <motion.p className="text-sm text-white/85" itemProp="location" itemScope itemType="https://schema.org/Place" variants={fade}>
-              {(() => {
-                const base = "underline decoration-dotted underline-offset-4 hover:opacity-90";
-                if (!locationUrl) return <span itemProp="name">{location}</span>;
-                if (locationUrl.startsWith("/")) return <Link href={locationUrl} className={base} itemProp="url"><span itemProp="name">{location}</span></Link>;
-                return <a href={locationUrl} target="_blank" rel="noopener noreferrer" className={base} itemProp="url"><span itemProp="name">{location}</span></a>;
-              })()}
-            </motion.p>
-
-            {limitedPct !== null && (
-              <motion.div className="flex items-center gap-2 text-xs text-white/85" variants={fade}>
-                <div className="h-2 w-32 rounded-full bg-white/10 border border-white/15 overflow-hidden">
-                  <div className="h-full bg-white" style={{ width: `${limitedPct}%` }} />
+      <div className={innerClasses}>
+        
+        {/* LEFT COLUMN (Text) */}
+        <div className={`
+          flex flex-col justify-between gap-6
+          ${isFeaturedLayout ? "lg:col-span-7 lg:order-1 lg:py-4" : "flex-1"}
+        `}>
+          
+          <div className="space-y-6">
+            <div className="flex items-start justify-between gap-4">
+              
+              {/* FEATURED LABEL (Industrial Tag) */}
+              {isFeaturedLayout && (
+                <div className="flex items-center gap-3">
+                   <span className="bg-[#ea580c] text-white text-xs font-black uppercase tracking-widest px-3 py-1 rounded-sm shadow-[2px_2px_0px_0px_white]">
+                     Featured Event
+                   </span>
+                   <span className={`px-3 py-1 rounded-sm text-[10px] font-bold uppercase tracking-wide border ${statusConfig[computedStatus].color}`}>
+                      {statusConfig[computedStatus].text}
+                   </span>
                 </div>
-                <span>{limitedPct}% full</span>
-              </motion.div>
-            )}
-          </header>
+              )}
 
-          {tags.length > 0 && (
-            <motion.div className="flex flex-wrap gap-2.5" variants={fade}>
-              {tags.map((tag, i) => (
-                <motion.span
-                  key={`${tag}-${i}`}
-                  initial={{ opacity: 0, y: 8 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.4 }}
-                  transition={prefersReducedMotion ? { duration: 0.15 } : { duration: 0.35, delay: 0.02 * i }}
-                  className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium hover:bg-white/8 transition-colors"
+              {/* Date Box (Standard Layout Only) */}
+              {!isFeaturedLayout && (
+                 <motion.div 
+                  variants={itemVar}
+                  className="flex flex-col items-center justify-center rounded-lg bg-[#ea580c] px-3 py-2 text-center min-w-[60px] shadow-sm"
                 >
-                  <span className="mr-2 h-1.5 w-1.5 rounded-full bg-[#ff7a1a]" />
-                  {tag}
-                </motion.span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/90">{month}</span>
+                  <span className="text-2xl font-black text-white leading-none">{day}</span>
+                </motion.div>
+              )}
+
+              {!isFeaturedLayout && (
+                <motion.div variants={itemVar} className="flex flex-wrap justify-end gap-2">
+                   <span className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide border ${statusConfig[computedStatus].color}`}>
+                      {statusConfig[computedStatus].text}
+                   </span>
+                </motion.div>
+              )}
+            </div>
+
+            <motion.div variants={itemVar}>
+              {/* Title */}
+              <h2 className={`font-black tracking-tighter text-white mb-4 ${isFeaturedLayout ? "text-5xl md:text-7xl leading-[0.9] drop-shadow-lg" : "text-3xl md:text-4xl"}`} itemProp="name">
+                {title}
+              </h2>
+              
+              {/* Featured Metadata (Clean Text) */}
+              {isFeaturedLayout && (
+                <div className="flex flex-col gap-2 mb-6 pl-1 border-l-4 border-[#ea580c]">
+                  <div className="flex items-center gap-3 text-[#ea580c] font-bold text-lg uppercase tracking-widest">
+                     <span>{month} {day}</span>
+                     <span className="text-white/20">|</span>
+                     <span className="text-white">{formatTimeRange(startISO, endISO)}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-white/60 font-medium text-sm uppercase tracking-wide">
+                     <Icons.MapPin className="w-4 h-4" />
+                     {locationUrl ? (
+                       <a href={locationUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors underline decoration-white/20 underline-offset-4">{location}</a>
+                     ) : (
+                       <span>{location}</span>
+                     )}
+                  </div>
+                </div>
+              )}
+
+              {!isFeaturedLayout && (
+                <div className="flex flex-wrap items-center gap-y-2 gap-x-6 text-sm text-gray-400 mb-5 font-bold uppercase tracking-wide">
+                  <div className="flex items-center gap-2">
+                     <Icons.Clock className="w-4 h-4 text-[#ea580c]" />
+                     <span>{formatTimeRange(startISO, endISO)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                     <Icons.MapPin className="w-4 h-4 text-[#ea580c]" />
+                     <span>{location}</span>
+                  </div>
+                </div>
+              )}
+
+              <p className={`leading-relaxed text-gray-300 ${isFeaturedLayout ? "text-xl font-medium max-w-2xl" : "text-base line-clamp-3"}`}>
+                {description}
+              </p>
+            </motion.div>
+          </div>
+
+          {tags.length > 0 && !isFeaturedLayout && (
+            <motion.div variants={itemVar} className="flex flex-wrap gap-2">
+              {tags.map((tag) => (
+                <span key={tag} className="px-3 py-1 rounded-md text-xs font-bold bg-[#222] text-gray-300 border border-[#333]">
+                  #{tag}
+                </span>
               ))}
             </motion.div>
           )}
 
-          <motion.p className="leading-relaxed text-white/95" itemProp="description" variants={fadeUp}>
-            {description}
-          </motion.p>
+          <motion.div variants={itemVar} className={`space-y-8 pt-6 ${!isFeaturedLayout ? "border-t border-white/5" : ""}`}>
+            
+            {/* Countdown */}
+            {!cd.past && !(cd as any).pending ? (
+               <div className={`flex gap-px overflow-hidden rounded-sm border-2 border-white/10 bg-black/50 ${isFeaturedLayout ? "py-3 max-w-md" : ""}`} suppressHydrationWarning>
+                 {['days', 'hours', 'minutes', 'seconds'].map((unit, i) => (
+                   <div key={unit} className={`flex-1 flex flex-col items-center justify-center py-2 ${i !== 0 && 'border-l border-white/10'}`}>
+                      <span className={`font-mono font-black text-white ${isFeaturedLayout ? "text-3xl" : "text-lg"}`}>
+                        {String((cd as any)[unit]).padStart(2, '0')}
+                      </span>
+                      <span className="text-[9px] uppercase font-bold tracking-widest text-white/40">{unit.substr(0,1)}</span>
+                   </div>
+                 ))}
+               </div>
+            ) : null}
 
-          <motion.div className="flex flex-wrap items-center gap-3 pt-1" variants={fade}>
-            <Link
-              href={buttonLink}
-              className={[
-                "relative inline-flex items-center justify-center overflow-hidden rounded-full",
-                "border border-transparent px-5 py-2.5 text-sm font-semibold",
-                "bg-[#ff7a1a] text-black",
-                "transition-all hover:brightness-110 hover:shadow-[0_0_24px_rgba(255,122,26,0.45)]",
-              ].join(" ")}
-              aria-disabled={status === "SOLD_OUT" || status === "CANCELLED"}
-            >
-              <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent opacity-0 transition-all duration-700 group-hover:opacity-100 group-hover:translate-x-full" />
-              <span className="relative flex items-center">
-                {buttonText}
-                <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </span>
-            </Link>
-
-            {icsUrl && (
-              <a
-                download={`${title.replace(/\s+/g, "_")}.ics`}
-                href={icsUrl}
-                className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold hover:bg-white/8 transition-colors"
+            <div className="flex flex-wrap items-center gap-5">
+              <Link
+                href={buttonLink}
+                className={`group/btn inline-flex items-center justify-center gap-2 rounded-full bg-white text-black font-black uppercase tracking-wide transition-transform hover:-translate-y-1 shadow-[4px_4px_0px_0px_#ea580c] active:translate-y-0 active:shadow-[2px_2px_0px_0px_#ea580c] ${isFeaturedLayout ? "px-12 py-4 text-lg border-2 border-white" : "px-8 py-3 text-sm"}`}
               >
-                Add to Calendar
-              </a>
-            )}
+                <span>{buttonText}</span>
+                <svg className="w-5 h-5 transition-transform group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+              </Link>
 
-            {!!locationUrl && (locationUrl.includes("google.com/maps") || locationUrl.includes("maps.apple.com")) && (
-              <a
-                href={locationUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold hover:bg-white/8 transition-colors"
-              >
-                Directions
-              </a>
-            )}
-
-            <button
-              onClick={async () => {
-                try {
-                  const shareData = { title, text: description, url: buttonLink };
-                  if (navigator.share) await navigator.share(shareData);
-                  else { await navigator.clipboard.writeText(buttonLink); alert("Link copied!"); }
-                } catch {}
-              }}
-              className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold hover:bg-white/8 transition-colors"
-            >
-              Share
-            </button>
-          </motion.div>
-        </motion.div>
-
-        {/* IMAGE block */}
-        <motion.div className={`md:w-1/2 ${mediaOrder}`} variants={fadeUp}>
-          <div className="relative overflow-hidden rounded-xl border border-white/10 bg-[#0f1319]">
-            <div className="absolute left-3 top-3 z-10">
-              <span className={["inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold tracking-wide", statusChip[statusForChip]].join(" ")}>
-                {statusForChip.replace("_", " ")}
-              </span>
-            </div>
-
-            <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-white/10" />
-
-            <div className="aspect-[16/9] w-full">
-              {!imgError ? (
-                <motion.div
-                  initial={{ scale: 1.03 }}
-                  whileInView={{ scale: 1 }}
-                  whileHover={prefersReducedMotion ? {} : { scale: 1.03 }}
-                  viewport={{ once: true, amount: 0.3 }}
-                  transition={prefersReducedMotion ? { duration: 0.2 } : { duration: 0.5 }}
-                  className="relative w-full h-full"
+              {enableShare && (
+                <button 
+                  onClick={() => {
+                    if (navigator.share) navigator.share({ title, text: description, url: buttonLink });
+                    else navigator.clipboard.writeText(buttonLink);
+                  }}
+                  className={`rounded-full border-2 border-[#333] text-gray-400 hover:border-white hover:text-white hover:bg-white/5 transition-colors ${isFeaturedLayout ? "p-4" : "p-3"}`}
+                  title="Share"
                 >
-                  <Image
-                    src={imageUrl}
-                    alt={title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="object-cover"
-                    priority={false}
-                    onError={() => setImgError(true)}
-                  />
-                </motion.div>
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-black/40">
-                  <span className="text-3xl font-bold text-white">
-                    {title.split(" ").slice(0, 2).map((s) => s[0]).join("").toUpperCase()}
-                  </span>
-                </div>
+                   <Icons.Share className="w-6 h-6" />
+                </button>
               )}
             </div>
-          </div>
-        </motion.div>
-      </motion.div>
+          </motion.div>
+        </div>
 
-      {/* subtle dotted accent in theme orange */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-6 -bottom-6 h-24 w-24 opacity-30"
-        style={{ backgroundImage: "radial-gradient(rgba(255,122,26,0.35) 1px, transparent 1px)", backgroundSize: "8px 8px" }}
-      />
+        {/* RIGHT COLUMN (Image) */}
+        <div className={`
+          shrink-0 relative
+          ${isFeaturedLayout ? "lg:col-span-5 lg:order-2 h-full min-h-[400px]" : "md:w-[40%]"}
+        `}>
+           <motion.div 
+             className={`
+               relative w-full h-full overflow-hidden
+               ${isFeaturedLayout ? "rounded-2xl shadow-[8px_8px_0px_0px_#333] border-2 border-white/10" : "rounded-xl border border-white/10 bg-[#222]"}
+               ${isFeaturedLayout ? "aspect-[3/4] lg:aspect-auto" : "aspect-[4/5] md:aspect-[4/4]"}
+             `}
+             variants={itemVar}
+           >
+             {!imgError ? (
+               <Image
+                 src={imageUrl}
+                 alt={title}
+                 fill
+                 className="object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                 onError={() => setImgError(true)}
+               />
+             ) : (
+               <div className="flex h-full w-full items-center justify-center bg-[#1a1a1a] text-white/20 font-bold text-4xl">
+                 {title.slice(0, 2).toUpperCase()}
+               </div>
+             )}
+             
+             {/* Scrim for image protection */}
+             <div className="absolute inset-0 shadow-[inset_0_0_40px_rgba(0,0,0,0.4)] pointer-events-none" />
+           </motion.div>
+        </div>
 
-      {/* SEO JSON-LD */}
+      </div>
+      
       {enableSeoJsonLd && (
         <script
           type="application/ld+json"
@@ -373,11 +435,8 @@ const EventCard: React.FC<EventCardProps> = ({
               "@type": "Event",
               name: title,
               startDate: startISO,
-              endDate: endISO ?? undefined,
-              eventStatus:
-                (status ?? statusForChip) === "CANCELLED" ? "https://schema.org/EventCancelled"
-                : (status ?? statusForChip) === "ENDED" ? "https://schema.org/EventCompleted"
-                : undefined,
+              endDate: endISO,
+              eventStatus: computedStatus === "CANCELLED" ? "https://schema.org/EventCancelled" : undefined,
               location: { "@type": "Place", name: location, url: locationUrl },
               image: imageUrl,
               description,

@@ -18,8 +18,6 @@ const NAV_LINKS = [
   { href: "/about-us", label: "About Us" },
   { href: "/events", label: "Events" },
   { href: "/team", label: "Team" },
-  // { href: "/dance", label: "Dance" },
-  // { href: "/sports", label: "Sports" },
   { href: "/gallery", label: "Gallery" },
 ];
 
@@ -40,9 +38,9 @@ export default function Navbar() {
 
   useEffect(() => setOpen(false), [pathname]);
 
-  // Add scroll detection to trigger glass effect
+  // Scroll detection
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > window.innerHeight * 0.6);
+    const handleScroll = () => setScrolled(window.scrollY > 50);
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
@@ -51,28 +49,35 @@ export default function Navbar() {
   return (
     <header
       className={[
-        "fixed top-0 left-0 z-[9999] w-full transition-all duration-500 ease-in-out",
+        "fixed top-0 left-0 z-[9999] w-full transition-all duration-300 ease-out",
         scrolled
-          ? // after first section → glass effect
-            "bg-white/10 backdrop-blur-[10px] shadow-[0_2px_20px_rgba(0,0,0,0.25)]"
-          : // before scroll → transparent
-            "bg-transparent backdrop-blur-0 shadow-none",
+          ? "bg-[#ea580c] border-b-2 border-black shadow-[0_4px_0px_0px_rgba(0,0,0,0.2)] py-2" // Industrial Orange Mode
+          : "bg-transparent py-4", // Transparent Mode
       ].join(" ")}
     >
-      <div className="mx-auto max-w-7xl px-4">
-        <nav className="flex h-16 md:h-20 items-center justify-between gap-4">
-          {/* brand */}
+      {/* Noise Texture Overlay (visible only when scrolled) */}
+      {scrolled && (
+        <div 
+          className="absolute inset-0 opacity-[0.15] mix-blend-multiply pointer-events-none" 
+          style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} 
+        />
+      )}
+
+      <div className="relative mx-auto max-w-7xl px-6">
+        <nav className="flex h-14 items-center justify-between">
+          
+          {/* BRAND */}
           <Link
             href="/"
-            className="flex-shrink-0 text-2xl md:text-3xl font-extrabold tracking-tight text-white drop-shadow-[0_2px_3px_rgba(0,0,0,0.4)] hover:text-[#ffd9a3] transition"
+            className="flex-shrink-0 text-2xl md:text-3xl font-black tracking-tighter text-white drop-shadow-sm hover:text-black transition-colors"
             aria-label="UTSBDSOC Home"
           >
             UTSBDSOC
           </Link>
 
-          {/* desktop links */}
+          {/* DESKTOP LINKS */}
           <div className="hidden md:flex">
-            <ul className="flex items-center gap-2 text-lg font-medium">
+            <ul className="flex items-center gap-1">
               {NAV_LINKS.map(({ href, label }) => {
                 const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
                 return (
@@ -80,12 +85,11 @@ export default function Navbar() {
                     <Link
                       href={href}
                       className={[
-                        "relative nav-underline rounded-full px-3 py-1 transition",
-                        "text-white/95 hover:text-white",
-                        "hover:bg-white/10 hover:shadow-[0_0_10px_rgba(255,140,51,0.25)]",
-                        active
-                          ? "text-white bg-white/10 shadow-[0_0_12px_rgba(255,140,51,0.3)]"
-                          : "",
+                        "relative px-4 py-2 font-bold text-sm uppercase tracking-wide transition-all duration-200",
+                        "hover:bg-black hover:text-white rounded-md",
+                        active 
+                          ? "bg-black text-white shadow-[2px_2px_0px_0px_white]" 
+                          : "text-white"
                       ].join(" ")}
                     >
                       {label}
@@ -96,55 +100,57 @@ export default function Navbar() {
             </ul>
           </div>
 
-          {/* socials & membership */}
-          <div className="hidden md:flex items-center gap-3">
-            {SOCIALS.map(({ href, icon: Icon, label }) => (
-              <a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={label}
-                className="rounded-md p-1 text-white/90 hover:text-[#ffb066] hover:drop-shadow-[0_0_10px_rgba(255,140,51,0.4)] transition"
-              >
-                <Icon size={20} />
-              </a>
-            ))}
+          {/* SOCIALS & MEMBERSHIP */}
+          <div className="hidden md:flex items-center gap-4">
+            <div className="flex items-center gap-2 border-r-2 border-white/20 pr-4">
+              {SOCIALS.slice(0, 4).map(({ href, icon: Icon, label }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="text-white hover:text-black hover:scale-110 transition-transform"
+                >
+                  <Icon size={18} />
+                </a>
+              ))}
+            </div>
 
-            {/* Membership */}
+            {/* Hard Shadow Button */}
             <a
               href="https://www.activateuts.com.au/clubs/bangladeshi-society"
               target="_blank"
               rel="noopener noreferrer"
-              className="ml-1 rounded-full bg-white px-4 py-2.5 font-semibold text-[#f57c00] shadow-md hover:bg-[#fff5d9] hover:scale-[1.03] transition-transform"
+              className="rounded-full bg-white px-5 py-2 text-xs font-black uppercase tracking-widest text-black shadow-[3px_3px_0px_0px_black] hover:translate-y-px hover:shadow-[1px_1px_0px_0px_black] transition-all border-2 border-black"
             >
-              Membership
+              Join Us
             </a>
           </div>
 
-          {/* mobile burger */}
+          {/* MOBILE HAMBURGER */}
           <button
             aria-label="Open menu"
             aria-expanded={open}
             onClick={() => setOpen((s) => !s)}
-            className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-white hover:text-[#ffb066] focus:outline-none focus:ring-2 focus:ring-white/60"
+            className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-white hover:bg-black focus:outline-none"
           >
             <div className="space-y-1.5">
               <span
                 className={[
-                  "block h-0.5 w-6 bg-white transition",
+                  "block h-0.5 w-6 bg-current transition-transform origin-center",
                   open ? "translate-y-2 rotate-45" : "",
                 ].join(" ")}
               />
               <span
                 className={[
-                  "block h-0.5 w-6 bg-white transition",
+                  "block h-0.5 w-6 bg-current transition-opacity",
                   open ? "opacity-0" : "",
                 ].join(" ")}
               />
               <span
                 className={[
-                  "block h-0.5 w-6 bg-white transition",
+                  "block h-0.5 w-6 bg-current transition-transform origin-center",
                   open ? "-translate-y-2 -rotate-45" : "",
                 ].join(" ")}
               />
@@ -153,27 +159,29 @@ export default function Navbar() {
         </nav>
       </div>
 
-      {/* mobile drawer */}
+      {/* MOBILE DRAWER (Industrial Style) */}
       <div
         className={[
-          "md:hidden fixed inset-x-0 top-16 md:top-20 z-[9999] origin-top",
-          "bg-[linear-gradient(135deg,#ff8c33_0%,#f57c00_100%)]",
-          "transition-transform duration-300 will-change-transform",
-          open ? "translate-y-0" : "-translate-y-[120%]",
+          "md:hidden fixed inset-x-0 top-[60px] z-[9998] origin-top",
+          "bg-[#ea580c] border-b-4 border-black shadow-2xl",
+          "transition-transform duration-300 ease-in-out",
+          open ? "translate-y-0" : "-translate-y-[150%]",
         ].join(" ")}
       >
-        <div className="mx-auto max-w-7xl px-4 py-6">
-          <ul className="space-y-4 text-white/95 text-lg font-medium">
+        <div className="absolute inset-0 opacity-[0.15] mix-blend-multiply pointer-events-none" style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} />
+        
+        <div className="relative mx-auto px-6 py-8 flex flex-col gap-6">
+          <ul className="space-y-2">
             {NAV_LINKS.map(({ href, label }) => {
               const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
               return (
                 <li key={href}>
                   <Link
                     href={href}
+                    onClick={() => setOpen(false)}
                     className={[
-                      "block rounded-full px-3 py-2 transition",
-                      "hover:bg-white/15 hover:shadow-[0_0_10px_rgba(255,140,51,0.35)]",
-                      active ? "bg-white/20 shadow-[0_0_12px_rgba(255,140,51,0.4)]" : "",
+                      "block text-3xl font-black uppercase tracking-tighter transition-colors",
+                      active ? "text-black underline decoration-4 underline-offset-4" : "text-white hover:text-black/80"
                     ].join(" ")}
                   >
                     {label}
@@ -183,7 +191,9 @@ export default function Navbar() {
             })}
           </ul>
 
-          <div className="mt-6 flex items-center gap-4">
+          <div className="h-[2px] w-full bg-black/10"></div>
+
+          <div className="flex items-center gap-6">
             {SOCIALS.map(({ href, icon: Icon, label }) => (
               <a
                 key={label}
@@ -191,9 +201,9 @@ export default function Navbar() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={label}
-                className="rounded-md p-1 text-white/95 transition hover:text-[#ffb066]"
+                className="text-white hover:text-black transition-colors"
               >
-                <Icon size={22} />
+                <Icon size={24} />
               </a>
             ))}
           </div>
@@ -202,38 +212,12 @@ export default function Navbar() {
             href="https://www.activateuts.com.au/clubs/bangladeshi-society"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-6 inline-flex rounded-full bg-white px-5 py-3 font-semibold text-[#f57c00] shadow-md hover:bg-[#fff5d9] hover:scale-[1.03] transition-transform"
+            className="w-full text-center rounded-full bg-black py-4 text-sm font-bold uppercase tracking-widest text-white shadow-[4px_4px_0px_0px_white] active:translate-y-1 active:shadow-none transition-all"
           >
-            Membership
+            Become a Member
           </a>
         </div>
       </div>
-
-      {/* underline effect */}
-      <style jsx global>{`
-        .nav-underline::after {
-          content: "";
-          position: absolute;
-          left: 12px;
-          right: 12px;
-          bottom: -6px;
-          height: 2px;
-          width: 0%;
-          margin: 0 auto;
-          background: linear-gradient(
-            90deg,
-            rgba(255, 140, 51, 1) 0%,
-            rgba(255, 210, 154, 0.8) 50%,
-            rgba(255, 140, 51, 1) 100%
-          );
-          box-shadow: 0 0 10px rgba(255, 140, 51, 0.45);
-          transition: width 220ms ease;
-        }
-        .nav-underline:hover::after,
-        .nav-underline:focus::after {
-          width: calc(100% - 24px);
-        }
-      `}</style>
     </header>
   );
 }

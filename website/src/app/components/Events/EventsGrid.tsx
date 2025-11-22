@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { EventItem, EventTag } from "./events.types";
-import { formatDT, googleCalLink, isUpcoming, useBodyScrollLock } from "./events.utils";
+import { formatDT, googleCalLink, isUpcoming, useBodyScrollLock, resolveEventImage } from "./events.utils";
 
 /** estimate current grid columns */
 function useGridColumns(containerRef: React.RefObject<HTMLDivElement | null>) {
@@ -44,7 +44,7 @@ function EventModal({ event, onClose }: { event: EventItem | null; onClose: () =
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
       <div onClick={stop} className="relative z-[81] w-full max-w-3xl rounded-2xl border border-white/10 bg-[#0e1218] text-orange-50 shadow-2xl">
         <div className="relative aspect-[16/9] overflow-hidden rounded-t-2xl">
-          <img src={event.image} alt={event.title} className="h-full w-full object-cover" />
+          <img src={resolveEventImage(event)} alt={event.title} className="h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
           <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
             {event.tags.map((t) => (
@@ -165,7 +165,7 @@ export default function EventsGrid({ items, initialVisible = 6 }: { items: Event
               onKeyDown={(ev) => (ev.key === "Enter" || ev.key === " ") && (ev.preventDefault(), setSelected(e))}
               className="group cursor-pointer rounded-2xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-sm hover:border-orange-400/60 transition">
               <div className="relative aspect-[16/9] overflow-hidden">
-                <img src={e.image} alt={e.title} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" loading="lazy" />
+                <img src={resolveEventImage(e)} alt={e.title} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" loading="lazy" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
                 <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
                   {e.tags.map((t) => (

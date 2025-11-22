@@ -41,14 +41,26 @@ export default function DancePage() {
     <>
       <Navbar />
 
-      <main className="relative min-h-screen text-white bg-[linear-gradient(135deg,#ff8c33_0%,#f57c00_100%)]">
+      <main className="relative min-h-screen text-white bg-[#f57c00]">
         {/* subtle texture */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-15"
           style={{
-            backgroundImage: "radial-gradient(rgba(255,255,255,0.25) 1px, transparent 1px)",
-            backgroundSize: "10px 10px",
+            backgroundImage:
+              "radial-gradient(rgba(255,255,255,0.25) 1px, transparent 1px)",
+            backgroundSize: "50px 50px",
+            backgroundPosition: "0 0, 25px 25px",
+          }}
+        />
+        {/* Orange glow at top */}
+        <div
+          className="absolute inset-x-0 top-0 h-[300px]"
+          style={{
+            backgroundImage: [
+              "rgba(255,140,51,0)",
+              "radial-gradient(100% 100% at 50% 100%, rgba(255,140,51,0.2) 0%, rgba(255,140,51,0) 50%)",
+            ].join(","),
           }}
         />
 
@@ -57,8 +69,10 @@ export default function DancePage() {
           aria-hidden
           className="pointer-events-none mx-auto h-8 max-w-7xl rounded-full opacity-50 mt-2"
           style={{
-            background:
-              "radial-gradient(60% 100% at 50% 0%, rgba(255,140,51,0.35) 0%, rgba(255,140,51,0) 70%)",
+            backgroundImage: [
+              "rgba(255,140,51,0)",
+              "radial-gradient(100% 100% at 50% 100%, rgba(255,140,51,0.2) 0%, rgba(255,140,51,0) 50%)",
+            ].join(","),
           }}
         />
 

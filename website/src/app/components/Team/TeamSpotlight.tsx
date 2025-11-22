@@ -6,7 +6,7 @@ import { FiInstagram, FiLinkedin, FiMail } from "react-icons/fi";
 export default function TeamSpotlight({ member }: { member: TeamMember }) {
   return (
     <section className="mx-auto max-w-6xl mt-6 px-4 md:px-0">
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#141414] via-[#1a1411] to-[#20160f] p-6 md:p-10">
+      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#141414] p-6 md:p-10">
         <div className="flex flex-col md:flex-row items-center gap-6">
           <img
             src={member.headshot}
