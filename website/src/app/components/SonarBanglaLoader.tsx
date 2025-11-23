@@ -7,27 +7,25 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-/* ------- Orange + warm charcoal palette ------- */
+/* ------- Industrial Theme Palette ------- */
 const palette = {
-  bgFrom: "from-[#1b1b1b]",
-  bgVia: "via-[#221c19]",
-  bgTo: "to-[#2d1f15]",
-  textMain: "text-orange-100",
-  dot: "bg-orange-400",
-  framePrimary: "border-orange-400",
-  frameSecondary: "border-orange-300",
-  frameSmoke: "border-stone-300/80",
+  bg: "bg-[#0a0a0a]",
+  textMain: "text-white",
+  accent: "text-[#ea580c]",
+  cardBorder: "border-white",
+  cardShadow: "shadow-[4px_4px_0px_0px_#ea580c]",
 };
 
 export default function SonarBanglaLoader() {
   const [leaving, setLeaving] = useState(false);
   const router = useRouter();
   const prefersReduced = useReducedMotion();
+  const isMobile = useIsMobile();
 
   const handleExplore = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     setLeaving(true);
-    setTimeout(() => router.push("/home"), 350);
+    setTimeout(() => router.push("/home"), 400);
   };
 
   return (
@@ -36,264 +34,138 @@ export default function SonarBanglaLoader() {
       animate={leaving ? "exit" : "enter"}
       variants={{
         hidden: { opacity: 0 },
-        enter: { opacity: 1, transition: { duration: 0.25 } },
-        exit: { opacity: 0, transition: { duration: 0.35 } },
+        enter: { opacity: 1, transition: { duration: 0.3 } },
+        exit: { opacity: 0, y: -20, transition: { duration: 0.4 } },
       }}
       className={twMerge(
-        "relative grid min-h-screen w-full place-content-center overflow-hidden",
-        "bg-background",
-        palette.bgFrom,
-        palette.bgVia,
-        palette.bgTo
+        "relative flex flex-col items-center justify-center min-h-[100svh] w-full overflow-hidden",
+        palette.bg
       )}
-      aria-label="Hero"
+      aria-label="Hero Loader"
     >
-      {/* Lightweight radial vignettes (no blur filters) */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-transparent" />
-        <div className="absolute inset-0 bg-transparent" />
-      </div>
+      {/* --- Industrial Background --- */}
+      <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(234,88,12,0.08),transparent_70%)] pointer-events-none" />
+      
+      {/* --- Main Content (Centered) --- */}
+      <div className="relative z-50 flex flex-col items-center text-center gap-8 mb-12 md:mb-0">
+        
+        {/* Animated Headline */}
+        <div className="flex flex-col items-center gap-2">
+           <div className="flex items-center gap-3 mb-2">
+             <span className="h-[2px] w-8 bg-[#ea580c]"></span>
+             <span className="text-xs font-black uppercase tracking-[0.3em] text-white/50">Welcome To</span>
+             <span className="h-[2px] w-8 bg-[#ea580c]"></span>
+           </div>
+           <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-white uppercase leading-none drop-shadow-2xl">
+             UTS<span className="text-[#ea580c]">BDSOC</span>
+           </h1>
+        </div>
 
-      {/* Big animated bilingual headline */}
-      <div className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center">
-        <AnimatedWords
-          big
-          textClass={twMerge(palette.textMain, "tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,.5)]")}
-          dotClass={palette.dot}
-          disableAnimation={prefersReduced ?? false}
-        />
-      </div>
-
-      {/* Explore (CSS pulse instead of animated box-shadow) */}
-      <div className="absolute bottom-10 left-1/2 z-50 -translate-x-1/2 transform">
+        {/* Explore Button (Industrial Pill) */}
         <Link
           href="/home"
           onClick={handleExplore}
-          className="relative px-14 py-5 rounded-full font-extrabold text-2xl bg-orange-500 text-black shadow-lg hover:bg-orange-400 transition focus:outline-none focus:ring-4 focus:ring-orange-300"
+          className="group relative inline-flex items-center justify-center gap-3 bg-white text-black px-10 py-4 text-lg font-black uppercase tracking-wide transition-transform hover:-translate-y-1 shadow-[6px_6px_0px_0px_#ea580c] active:translate-y-0 active:shadow-[2px_2px_0px_0px_#ea580c] rounded-full border-2 border-black z-50"
         >
-          <span className={prefersReduced ? "" : "pulse-ring"} />
-          <span>Explore</span>
+          Enter Site
+          <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
         </Link>
       </div>
 
-      {/* Subtle smoke (static SVG path instead of big blurs) */}
-      {!prefersReduced && <LightweightSmoke />}
+      {/* --- Cards Layer --- */}
+      {/* Desktop: Draggable Scatter | Mobile: Auto-scrolling Marquee */}
+      <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none md:pointer-events-auto">
+         {isMobile ? <MobileMarquee /> : <DesktopCards />}
+      </div>
 
-      <Cards />
-      <style jsx global>{`
-        /* GPU-friendly pulse (scale/opacity only) */
-        .pulse-ring {
-          position: absolute;
-          inset: -10px;
-          border-radius: 9999px;
-          will-change: transform, opacity;
-          animation: pulse 1.6s ease-in-out infinite;
-          pointer-events: none;
-        }
-        @keyframes pulse {
-          0% { transform: scale(1); opacity: .35; }
-          70% { transform: scale(1.15); opacity: 0; }
-          100% { transform: scale(1.15); opacity: 0; }
-        }
-      `}</style>
     </motion.section>
   );
 }
 
-/* ---------- Animated bilingual words (lighter) ---------- */
+/* ---------------- DESKTOP SCATTER CARDS ---------------- */
 
-const ONE_SECOND = 1000;
-const WORD_WAIT = ONE_SECOND * 2;
-
-function AnimatedWords({
-  big = false,
-  textClass = "",
-  dotClass = "",
-  disableAnimation = false,
-}: {
-  big?: boolean;
-  textClass?: string;
-  dotClass?: string;
-  disableAnimation?: boolean;
-}) {
-  const en = useMemo(() => ["Students", "Alumni", "Staff", "Public"], []);
-  const bn = useMemo(() => ["ছাত্রছাত্রী", "প্রাক্তন", "কর্মী", "জনসাধারণ"], []);
-  const sequence = useMemo(() => en.flatMap((w, i) => [w, bn[i]]), [en, bn]);
-
-  const [idx, setIdx] = useState(0);
-
-  useEffect(() => {
-    if (disableAnimation) return;
-    let active = true;
-    const id = setInterval(() => {
-      if (!active || document.hidden) return; // pause when tab hidden
-      setIdx((p) => (p + 1) % sequence.length);
-    }, WORD_WAIT);
-    return () => {
-      active = false;
-      clearInterval(id);
-    };
-  }, [sequence.length, disableAnimation]);
-
-  return (
-    <div className="relative flex items-center justify-center">
-      {sequence.map((word, i) => {
-        const active = i === idx || disableAnimation;
-        return (
-          <motion.div
-            key={`${word}-${i}`}
-            initial={false}
-            animate={active ? "active" : "inactive"}
-            variants={{
-              active: { opacity: 1, y: 0, scale: 1 },
-              inactive: { opacity: 0, y: 20, scale: 0.99 },
-            }}
-            transition={{ duration: 0.28 }}
-            className={twMerge(
-              "absolute font-extrabold text-center flex items-center gap-3 will-change-transform transform-gpu",
-              big ? "text-[20vw] md:text-[200px] leading-none" : "text-3xl md:text-5xl",
-              textClass
-            )}
-          >
-            {word}
-            <span
-              className={twMerge("inline-block align-middle rounded-md", dotClass)}
-              style={{ width: big ? "0.55em" : "0.5em", height: big ? "0.55em" : "0.5em" }}
-            />
-          </motion.div>
-        );
-      })}
-    </div>
-  );
-}
-
-/* ---------- Cards (optimized) ---------- */
-
-const Cards = React.memo(function Cards() {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const isMobile = useIsMobile();
-  const maxZRef = useRef(10); // local counter instead of DOM reads
+const DesktopCards = React.memo(function DesktopCards() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const maxZRef = useRef(10);
 
   const bumpZ = (setZ: React.Dispatch<React.SetStateAction<number>>) => {
     maxZRef.current += 1;
     setZ(maxZRef.current);
   };
 
+  const images = [
+    { src: "/dhaka-skyline-rickshaws.png", alt: "Dhaka", r: "4deg", t: "10%", l: "10%" },
+    { src: "/traditional-bengali-boat.png", alt: "Boat", r: "-6deg", t: "60%", l: "15%" },
+    { src: "/sundarbans-tiger.png", alt: "Tiger", r: "8deg", t: "15%", l: "65%" },
+    { src: "/coxs-bazar-fishing-boats.png", alt: "Cox's Bazar", r: "-3deg", t: "55%", l: "70%" },
+    { src: "/bengali-sweets-food.png", alt: "Sweets", r: "12deg", t: "30%", l: "80%" },
+    { src: "/pohela-boishakh-celebration.png", alt: "Boishakh", r: "-8deg", t: "40%", l: "5%" },
+  ];
+
   return (
-    <div className="absolute inset-0 z-40" ref={containerRef}>
-      <Card
-        containerRef={containerRef}
-        src="/dhaka-skyline-rickshaws.png"
-        alt="Dhaka cityscape"
-        rotate="4deg"
-        top="14%"
-        left="16%"
-        frame="primary"
-        className="w-64 md:w-[28rem]"
-        isMobile={isMobile}
-        bumpZ={bumpZ}
-      />
-      <Card
-        containerRef={containerRef}
-        src="/traditional-bengali-boat.png"
-        alt="Bengali boat"
-        rotate="12deg"
-        top="44%"
-        left="60%"
-        frame="secondary"
-        className="w-56 md:w-[24rem]"
-        isMobile={isMobile}
-        bumpZ={bumpZ}
-      />
-      <Card
-        containerRef={containerRef}
-        src="/sundarbans-tiger.png"
-        alt="Sundarbans"
-        rotate="-6deg"
-        top="10%"
-        left="40%"
-        frame="smoke"
-        className="w-80 md:w-[34rem]"
-        isMobile={isMobile}
-        bumpZ={bumpZ}
-      />
-      <Card
-        containerRef={containerRef}
-        src="/coxs-bazar-fishing-boats.png"
-        alt="Cox's Bazar beach"
-        rotate="6deg"
-        top="58%"
-        left="30%"
-        frame="primary"
-        className="w-72 md:w-[30rem]"
-        isMobile={isMobile}
-        bumpZ={bumpZ}
-      />
-      <Card
-        containerRef={containerRef}
-        src="/bengali-sweets-food.png"
-        alt="Bengali cuisine"
-        rotate="16deg"
-        top="18%"
-        left="68%"
-        frame="secondary"
-        className="w-60 md:w-[26rem]"
-        isMobile={isMobile}
-        bumpZ={bumpZ}
-      />
-      <Card
-        containerRef={containerRef}
-        src="/pohela-boishakh-celebration.png"
-        alt="Pohela Boishakh"
-        rotate="-3deg"
-        top="38%"
-        left="52%"
-        frame="smoke"
-        className="w-48 md:w-[22rem]"
-        isMobile={isMobile}
-        bumpZ={bumpZ}
-      />
-      <Card
-        containerRef={containerRef}
-        src="/lalbagh-fort-architecture.png"
-        alt="Lalbagh Fort"
-        rotate="-10deg"
-        top="64%"
-        left="14%"
-        frame="secondary"
-        className="w-56 md:w-[24rem]"
-        isMobile={isMobile}
-        bumpZ={bumpZ}
-      />
-      <Card
-        containerRef={containerRef}
-        src="/bengali-handloom-weaving.png"
-        alt="Bengali handloom"
-        rotate="14deg"
-        top="66%"
-        left="72%"
-        frame="primary"
-        className="w-48 md:w-[22rem]"
-        isMobile={isMobile}
-        bumpZ={bumpZ}
-      />
+    <div className="w-full h-full" ref={containerRef}>
+      {images.map((img, i) => (
+        <Card
+          key={i}
+          containerRef={containerRef}
+          src={img.src}
+          alt={img.alt}
+          rotate={img.r}
+          top={img.t}
+          left={img.l}
+          className="w-[22rem] xl:w-[28rem]"
+          bumpZ={bumpZ}
+        />
+      ))}
     </div>
   );
 });
 
-type AnyDivRef = React.RefObject<HTMLDivElement | null>;
-type FrameTone = "primary" | "secondary" | "smoke";
+/* ---------------- MOBILE MARQUEE (Better UX) ---------------- */
+
+const MobileMarquee = () => {
+  const images = [
+    "/dhaka-skyline-rickshaws.png",
+    "/traditional-bengali-boat.png",
+    "/sundarbans-tiger.png",
+    "/coxs-bazar-fishing-boats.png",
+    "/bengali-sweets-food.png",
+    "/pohela-boishakh-celebration.png",
+  ];
+
+  return (
+    <div className="absolute bottom-0 w-full pb-8 overflow-hidden">
+       <div className="flex w-[200%] animate-marquee">
+          {[...images, ...images].map((src, i) => (
+             <div key={i} className="w-40 sm:w-48 aspect-[4/3] shrink-0 mx-2 relative rounded-xl border-2 border-white bg-[#1a1a1a] shadow-[4px_4px_0px_0px_#ea580c] overflow-hidden rotate-1 odd:-rotate-1">
+                <Image src={src} alt="Culture" fill className="object-cover grayscale opacity-80" />
+             </div>
+          ))}
+       </div>
+       <style jsx>{`
+         .animate-marquee {
+           animation: marquee 25s linear infinite;
+         }
+         @keyframes marquee {
+           0% { transform: translateX(0); }
+           100% { transform: translateX(-50%); }
+         }
+       `}</style>
+    </div>
+  );
+};
+
+/* ---------------- SHARED CARD COMPONENT ---------------- */
 
 type CardProps = {
-  containerRef: AnyDivRef;
+  containerRef: React.RefObject<HTMLDivElement | null>;
   src: string;
   alt: string;
   top: string;
   left: string;
   rotate: string;
-  frame: FrameTone;
   className?: string;
-  isMobile: boolean;
   bumpZ: (setter: React.Dispatch<React.SetStateAction<number>>) => void;
 };
 
@@ -304,80 +176,50 @@ const Card = React.memo(function Card({
   top,
   left,
   rotate,
-  frame,
   className,
-  isMobile,
   bumpZ,
 }: CardProps) {
   const [zIndex, setZIndex] = useState(0);
-
-  const frameClass =
-    frame === "primary"
-      ? palette.framePrimary
-      : frame === "secondary"
-      ? palette.frameSecondary
-      : palette.frameSmoke;
-
-  const mobileFloat = isMobile
-    ? {
-        animate: { y: [0, -5, 0, 5, 0] },
-        transition: { duration: 8, repeat: Infinity, ease: "easeInOut" as const },
-      }
-    : {};
 
   return (
     <motion.div
       onPointerDown={() => bumpZ(setZIndex)}
       style={{ top, left, rotate, zIndex }}
       className={twMerge(
-        "absolute rounded-2xl border-2 p-3 pb-7 shadow-lg",
-        "bg-black/10",
-        frameClass,
-        isMobile ? "cursor-default" : "cursor-grab active:cursor-grabbing",
-        "will-change-transform transform-gpu",
+        "absolute p-2 pb-8 shadow-2xl cursor-grab active:cursor-grabbing",
+        "bg-[#1a1a1a] border-2 border-white",
+        "shadow-[8px_8px_0px_0px_rgba(0,0,0,0.5)]", // Hard shadow
+        "transition-shadow duration-200",
         className
       )}
-      drag={isMobile ? false : true}
+      drag
       dragConstraints={containerRef}
-      dragElastic={0.55}
+      dragElastic={0.2}
       dragMomentum={false}
-      whileHover={isMobile ? undefined : { scale: 1.03 }}
-      whileTap={{ scale: 1.01 }}
-      whileDrag={isMobile ? undefined : { scale: 1.05, rotate: 0 }}
-      transition={{ type: "spring", stiffness: 260, damping: 24 }}
-      {...mobileFloat}
+      whileHover={{ scale: 1.05, rotate: 0, boxShadow: "12px 12px 0px 0px #ea580c", borderColor: "#ea580c" }}
+      whileTap={{ scale: 1.02, cursor: "grabbing" }}
     >
-      <Image
-        src={src}
-        alt={alt}
-        width={800}
-        height={500}
-        priority={false}
-        sizes="(max-width: 768px) 60vw, 40vw"
-        loading="lazy"
-        decoding="async"
-        className="select-none pointer-events-none rounded-xl"
-        draggable={false}
-      />
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-black">
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes="(max-width: 768px) 100vw, 33vw"
+          className="pointer-events-none select-none object-cover grayscale hover:grayscale-0 transition-all duration-500"
+          draggable={false}
+        />
+        {/* Inner Shadow */}
+        <div className="absolute inset-0 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] pointer-events-none" />
+      </div>
+      
+      {/* Tape Label */}
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-4 bg-[#ea580c]/20 skew-x-12" />
     </motion.div>
   );
 });
 
-/* ---------- Very light “smoke” using SVG (no blur) ---------- */
-function LightweightSmoke() {
-  return (
-    <svg className="absolute w-full h-full">
-      <defs>
-      <linearGradient id="sm1" x1="0" x2="0" y1="0" y2="1">
-        <stop offset="0%" stopColor="#10B981" />
-        <stop offset="100%" stopColor="#10B981" />
-      </linearGradient>
-      </defs>
-    </svg>
-  );
-}
+/* ---------------- UTILS ---------------- */
 
-/* ---------- Helpers ---------- */
 function useIsMobile(breakpoint = 768) {
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {

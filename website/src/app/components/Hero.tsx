@@ -3,6 +3,10 @@
 import React, { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
+import { FaTrophy } from "react-icons/fa"; // 
+
+
+
 
 const colors = {
   brand: "#ea580c",
@@ -59,19 +63,13 @@ const Hero: React.FC = () => {
         </div>
 
         {/* === RIGHT: LOGO === */}
-        {/* Added w-full to ensure container takes available space */}
         <div className="flex items-center justify-center px-4 order-2 w-full">
           <div
             className={`
               relative rounded-full flex items-center justify-center overflow-hidden 
               ${colors.surface} border-2 md:border-4 
               shadow-[0_0_40px_rgba(234,88,12,0.2)] md:shadow-[0_0_80px_rgba(234,88,12,0.25)]
-              
-              /* === SIZE CONTROLS === */
-              w-full
-              max-w-[340px]        /* Mobile: Matches your "fine" mobile preference */
-              md:max-w-[600px]     /* Tablet: Large */
-              lg:max-w-[720px]     /* Desktop: MASSIVE (Matches your 2nd image) */
+              w-full max-w-[340px] md:max-w-[600px] lg:max-w-[720px]
             `}
             style={{ aspectRatio: "1 / 1", borderColor: colors.brand }}
           >
@@ -90,6 +88,32 @@ const Hero: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* ===== FLOATING VOTE BUTTON (NEW ADDITION) ===== */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.5, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ delay: 1, type: "spring" }}
+        className="fixed bottom-24 right-4 md:bottom-10 md:right-10 z-50"
+      >
+        <a
+          href="/graamys"
+          className="group relative flex items-center gap-3 bg-black border-2 border-white text-white px-5 py-3 md:px-6 md:py-4 rounded-full shadow-[4px_4px_0px_0px_#ea580c] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_#ea580c] active:translate-y-0 active:shadow-[2px_2px_0px_0px_#ea580c] transition-all"
+        >
+          {/* Ping Animation */}
+          <span className="absolute -top-1 -right-1 flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+          </span>
+
+          <FaTrophy className="text-[#ea580c] text-xl md:text-2xl group-hover:scale-110 transition-transform" />
+          
+          <div className="flex flex-col items-start leading-none">
+             <span className="text-[10px] md:text-xs font-bold uppercase text-gray-400 tracking-widest group-hover:text-white transition-colors">Vote Now</span>
+             <span className="text-sm md:text-lg font-black uppercase tracking-tighter">The Graamy's</span>
+          </div>
+        </a>
+      </motion.div>
 
       {/* ===== BOTTOM BUTTONS ===== */}
       <div className="absolute left-0 right-0 bottom-0 pb-[max(2rem,env(safe-area-inset-bottom))] pt-12 px-4 flex justify-center z-30 bg-gradient-to-t from-black via-black/90 to-transparent md:bg-none pointer-events-none">

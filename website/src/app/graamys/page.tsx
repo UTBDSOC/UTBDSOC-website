@@ -2,9 +2,16 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Navbar from "../../app/components/Navbar";
-import Footer from "../../app/components/Footer";
-import { FiArrowRight, FiCheck } from "react-icons/fi";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import { FiArrowRight, FiCheck, FiAlertCircle } from "react-icons/fi";
+
+// ==========================================
+// 🛠️ TEST MODE TOGGLE
+// Set to 'true' to test repeatedly without getting locked out.
+// Set to 'false' for the live production version.
+const TEST_MODE = true;
+// ==========================================
 
 // --- DATA: CATEGORIES ---
 const CATEGORIES = [
@@ -66,7 +73,7 @@ const CATEGORIES = [
 
 export default function GraamysPage() {
   // State
-  const [step, setStep] = useState(-1); // -1 = Intro, 0-8 = Categories, 9 = Success
+  const [step, setStep] = useState(-1); 
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [currentInput, setCurrentInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -74,10 +81,13 @@ export default function GraamysPage() {
 
   // --- CHECK FOR PREVIOUS VOTE ---
   useEffect(() => {
+    // If Test Mode is ON, we ignore the previous vote check
+    if (TEST_MODE) return;
+
     const voted = localStorage.getItem("utsbdsoc_graamys_voted");
     if (voted) {
       setHasVoted(true);
-      setStep(CATEGORIES.length); // Jump straight to success screen
+      setStep(CATEGORIES.length); 
     }
   }, []);
 
@@ -86,19 +96,16 @@ export default function GraamysPage() {
 
   const handleNext = () => {
     if (step >= 0 && step < CATEGORIES.length) {
-      // Save answer locally
       const newAnswers = { ...answers, [currentCategory.id]: currentInput };
       setAnswers(newAnswers);
-      setCurrentInput(""); // Reset input
+      setCurrentInput(""); 
 
-      // If it's the last step, submit
       if (step === CATEGORIES.length - 1) {
         submitVotes(newAnswers);
       } else {
         setStep((s) => s + 1);
       }
     } else {
-      // From intro screen
       setStep((s) => s + 1);
     }
   };
@@ -107,18 +114,19 @@ export default function GraamysPage() {
     setIsSubmitting(true);
     
     try {
-      // SEND TO API
       await fetch("/api/graamys", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(finalAnswers),
       });
 
-      // MARK AS VOTED
-      localStorage.setItem("utsbdsoc_graamys_voted", "true");
-      setHasVoted(true);
+      // ONLY LOCK THE USER OUT IF TEST MODE IS OFF
+      if (!TEST_MODE) {
+        localStorage.setItem("utsbdsoc_graamys_voted", "true");
+        setHasVoted(true);
+      }
       
-      setStep(CATEGORIES.length); // Go to success screen
+      setStep(CATEGORIES.length); 
     } catch (error) {
       console.error("Failed to submit votes", error);
       alert("Something went wrong. Please try again.");
@@ -133,12 +141,20 @@ export default function GraamysPage() {
 
       <main className="min-h-screen bg-[#0a0a0a] text-white relative overflow-hidden flex flex-col pt-20">
         
+        {/* TEST MODE INDICATOR */}
+        {TEST_MODE && (
+          <div className="fixed bottom-4 right-4 z-50 bg-red-600 text-white px-4 py-2 rounded-full font-bold text-xs shadow-xl border-2 border-white flex items-center gap-2 animate-pulse">
+            <FiAlertCircle size={16} />
+            TEST MODE ACTIVE
+          </div>
+        )}
+        
         {/* Background FX */}
         <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(234,88,12,0.15),transparent_70%)] pointer-events-none" />
         <div className="absolute top-20 left-0 right-0 h-[2px] bg-[#ea580c]" />
 
-        {/* PROGRESS BAR (Only during voting) */}
+        {/* PROGRESS BAR */}
         {step >= 0 && step < CATEGORIES.length && !hasVoted && (
           <div className="absolute top-[82px] left-0 w-full h-2 bg-[#1a1a1a]">
             <motion.div 
@@ -201,7 +217,6 @@ export default function GraamysPage() {
                 className="w-full max-w-xl"
               >
                 <div className="bg-[#121212] border-2 border-white/10 rounded-3xl p-8 md:p-12 shadow-[12px_12px_0px_0px_#ea580c] relative">
-                  {/* Category Count */}
                   <div className="absolute top-6 right-8 text-[#ea580c] font-black text-xl opacity-50">
                     {step + 1} / {CATEGORIES.length}
                   </div>
@@ -273,6 +288,13 @@ export default function GraamysPage() {
                 <p className="text-xl text-gray-400 mb-10">
                   Thanks for voting. Keep an eye on our Instagram for the shortlist reveal. See you at the Red Carpet! 💃🕺
                 </p>
+                
+                {TEST_MODE && (
+                  <p className="mb-8 text-red-500 font-bold bg-red-900/20 p-4 rounded-lg border border-red-500/50">
+                    ⚠️ TEST MODE ACTIVE: Refresh the page to vote again.
+                  </p>
+                )}
+
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <a 
                     href="https://instagram.com/utsbdsoc" 
