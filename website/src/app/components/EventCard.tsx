@@ -149,6 +149,16 @@ const Icons = {
       <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
     </svg>
   ),
+  CalendarPlus: (props: any) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+      <line x1="16" y1="2" x2="16" y2="6"></line>
+      <line x1="8" y1="2" x2="8" y2="6"></line>
+      <line x1="3" y1="10" x2="21" y2="10"></line>
+      <line x1="12" y1="14" x2="12" y2="18"></line>
+      <line x1="10" y1="16" x2="14" y2="16"></line>
+    </svg>
+  )
 };
 
 /* ---------- STATUS STYLES ---------- */
@@ -189,7 +199,7 @@ const EventCard: React.FC<EventCardProps> = ({
   const prefersReducedMotion = useReducedMotion();
   const cd = useCountdown(startISO);
 
-  // Tilt Logic (Only for non-featured cards)
+  // Tilt Logic
   const mouseX = useSpring(0, { stiffness: 500, damping: 100 });
   const mouseY = useSpring(0, { stiffness: 500, damping: 100 });
 
@@ -220,20 +230,19 @@ const EventCard: React.FC<EventCardProps> = ({
   const limitedPct = status === "LIMITED" && capacityUsed != null && capacityTotal ? Math.max(0, Math.min(100, Math.round((capacityUsed / capacityTotal) * 100))) : null;
   const computedStatus: EventStatus = status ?? (!cd.past ? "UPCOMING" : (endISO && new Date() > new Date(endISO) ? "ENDED" : "LIVE"));
   
-  // Framer Variants
+  // Variants
   const containerVar = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { staggerChildren: 0.1 } } };
   const itemVar = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } };
 
-  // --- DYNAMIC STYLES ---
-  // Featured Layout = Transparent, No Border, No Shadow (Seamless)
-  // Standard Layout = Boxed, Border, Shadow (Card)
   const wrapperClasses = isFeaturedLayout
-    ? "w-full max-w-7xl p-0 border-b-2 border-[#ea580c] pb-12 mb-12"
-    : `group relative mx-auto rounded-3xl border border-white/10 bg-[#121212] shadow-[0_0_0_1px_rgba(255,255,255,0.05)] w-full max-w-5xl p-1 hover:border-white/20 ${cardBgClassName || ""}`;
+    ? "w-full max-w-7xl p-0 border-b-2 border-[#ea580c] pb-12 mb-12 bg-transparent shadow-none"
+    : `group relative mx-auto w-full max-w-5xl rounded-2xl border border-white/10 bg-[#121212] 
+       transition-all duration-300 hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_#ea580c] hover:border-white/30
+       ${cardBgClassName || ""}`;
 
   const innerClasses = isFeaturedLayout
     ? "relative lg:grid lg:grid-cols-12 lg:gap-16 lg:items-start"
-    : `relative flex flex-col gap-6 overflow-hidden rounded-[20px] bg-[#141414] p-6 md:p-8 ${isReversed ? "md:flex-row-reverse" : "md:flex-row"}`;
+    : `relative flex flex-col gap-6 overflow-hidden p-6 md:p-8 ${isReversed ? "md:flex-row-reverse" : "md:flex-row"}`;
 
   return (
     <motion.article
@@ -249,7 +258,6 @@ const EventCard: React.FC<EventCardProps> = ({
       itemScope
       itemType="https://schema.org/Event"
     >
-      {/* Texture Overlay (Only for Boxed cards) */}
       {!isFeaturedLayout && (
         <div className="absolute inset-0 rounded-3xl opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} />
       )}
@@ -265,7 +273,6 @@ const EventCard: React.FC<EventCardProps> = ({
           <div className="space-y-6">
             <div className="flex items-start justify-between gap-4">
               
-              {/* FEATURED LABEL (Industrial Tag) */}
               {isFeaturedLayout && (
                 <div className="flex items-center gap-3">
                    <span className="bg-[#ea580c] text-white text-xs font-black uppercase tracking-widest px-3 py-1 rounded-sm shadow-[2px_2px_0px_0px_white]">
@@ -277,19 +284,18 @@ const EventCard: React.FC<EventCardProps> = ({
                 </div>
               )}
 
-              {/* Date Box (Standard Layout Only) */}
               {!isFeaturedLayout && (
                  <motion.div 
                   variants={itemVar}
-                  className="flex flex-col items-center justify-center rounded-lg bg-[#ea580c] px-3 py-2 text-center min-w-[60px] shadow-sm"
+                  className="flex flex-col items-center justify-center rounded-lg bg-[#ea580c] px-3 py-2 text-center min-w-[60px] shadow-sm text-black" 
                 >
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/90">{month}</span>
-                  <span className="text-2xl font-black text-white leading-none">{day}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider opacity-90">{month}</span>
+                  <span className="text-2xl font-black leading-none">{day}</span>
                 </motion.div>
               )}
 
               {!isFeaturedLayout && (
-                <motion.div variants={itemVar} className="flex flex-wrap justify-end gap-2">
+                <motion.div variants={itemVar} className="flex flex-wrap justify-end gap-2 ml-auto">
                    <span className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide border ${statusConfig[computedStatus].color}`}>
                       {statusConfig[computedStatus].text}
                    </span>
@@ -298,12 +304,10 @@ const EventCard: React.FC<EventCardProps> = ({
             </div>
 
             <motion.div variants={itemVar}>
-              {/* Title */}
-              <h2 className={`font-black tracking-tighter text-white mb-4 ${isFeaturedLayout ? "text-5xl md:text-7xl leading-[0.9] drop-shadow-lg" : "text-3xl md:text-4xl"}`} itemProp="name">
+              <h2 className={`font-black tracking-tighter text-white mb-4 group-hover:text-[#ea580c] transition-colors ${isFeaturedLayout ? "text-3xl md:text-5xl leading-[0.9] drop-shadow-lg" : "text-2xl md:text-3xl"}`} itemProp="name">
                 {title}
               </h2>
               
-              {/* Featured Metadata (Clean Text) */}
               {isFeaturedLayout && (
                 <div className="flex flex-col gap-2 mb-6 pl-1 border-l-4 border-[#ea580c]">
                   <div className="flex items-center gap-3 text-[#ea580c] font-bold text-lg uppercase tracking-widest">
@@ -344,8 +348,8 @@ const EventCard: React.FC<EventCardProps> = ({
           {tags.length > 0 && !isFeaturedLayout && (
             <motion.div variants={itemVar} className="flex flex-wrap gap-2">
               {tags.map((tag) => (
-                <span key={tag} className="px-3 py-1 rounded-md text-xs font-bold bg-[#222] text-gray-300 border border-[#333]">
-                  #{tag}
+                <span key={tag} className="inline-flex items-center rounded px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-gray-400 border border-white/10 bg-[#1a1a1a]">
+                  {tag}
                 </span>
               ))}
             </motion.div>
@@ -376,6 +380,18 @@ const EventCard: React.FC<EventCardProps> = ({
                 <svg className="w-5 h-5 transition-transform group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
               </Link>
 
+              {/* RESTORED CALENDAR BUTTON */}
+              {icsUrl && (
+                <a 
+                  href={icsUrl} 
+                  download="event.ics" 
+                  className={`rounded-full border-2 border-[#333] text-gray-400 hover:border-white hover:text-white hover:bg-white/5 transition-colors ${isFeaturedLayout ? "p-4" : "p-3"}`} 
+                  title="Add to Calendar"
+                >
+                   <Icons.CalendarPlus className="w-5 h-5" />
+                </a>
+              )}
+
               {enableShare && (
                 <button 
                   onClick={() => {
@@ -385,7 +401,7 @@ const EventCard: React.FC<EventCardProps> = ({
                   className={`rounded-full border-2 border-[#333] text-gray-400 hover:border-white hover:text-white hover:bg-white/5 transition-colors ${isFeaturedLayout ? "p-4" : "p-3"}`}
                   title="Share"
                 >
-                   <Icons.Share className="w-6 h-6" />
+                   <Icons.Share className="w-5 h-5" />
                 </button>
               )}
             </div>
@@ -400,7 +416,7 @@ const EventCard: React.FC<EventCardProps> = ({
            <motion.div 
              className={`
                relative w-full h-full overflow-hidden
-               ${isFeaturedLayout ? "rounded-2xl shadow-[8px_8px_0px_0px_#333] border-2 border-white/10" : "rounded-xl border border-white/10 bg-[#222]"}
+               ${isFeaturedLayout ? "rounded-2xl shadow-[8px_8px_0px_0px_#333] border-2 border-white/10" : "rounded-xl border-b border-white/10"}
                ${isFeaturedLayout ? "aspect-[3/4] lg:aspect-auto" : "aspect-[4/5] md:aspect-[4/4]"}
              `}
              variants={itemVar}
@@ -418,8 +434,6 @@ const EventCard: React.FC<EventCardProps> = ({
                  {title.slice(0, 2).toUpperCase()}
                </div>
              )}
-             
-             {/* Scrim for image protection */}
              <div className="absolute inset-0 shadow-[inset_0_0_40px_rgba(0,0,0,0.4)] pointer-events-none" />
            </motion.div>
         </div>

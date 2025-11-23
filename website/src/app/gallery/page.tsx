@@ -88,12 +88,11 @@ export default function GalleryPage() {
 
   // --- FEED LOGIC (Mixes all images for the TikTok feed) ---
   const feedItems = useMemo(() => {
-    // Copy the list and repeat it to make the scroll feel longer
     const base = [...ALL_IMAGES]; 
     const out: typeof base = [];
-    const reps = Math.ceil(24 / Math.max(1, base.length)); // Ensure reasonable scroll length
+    const reps = Math.ceil(24 / Math.max(1, base.length)); 
     for (let i=0;i<reps;i++) out.push(...base);
-    return out.slice(0, 30); // Limit to 30 items for performance
+    return out.slice(0, 30); 
   }, []);
 
   // --- KEYBOARD NAV ---
@@ -162,7 +161,7 @@ export default function GalleryPage() {
 
         <div className="relative z-10 max-w-7xl mx-auto space-y-24">
           
-          {/* === SECTION 1: VERTICAL SCROLL FEED (RESTORED) === */}
+          {/* === SECTION 1: VERTICAL SCROLL FEED === */}
           <div className="mb-24 border-b-2 border-white/10 pb-24">
              <div className="flex items-center justify-center gap-3 mb-12">
                <span className="w-3 h-3 bg-[#ea580c] rounded-full animate-pulse"></span>
@@ -173,7 +172,6 @@ export default function GalleryPage() {
                likes={likes}
                onLike={(src)=>setLike(src, 1)}
                onOpen={(feedIdx) => {
-                 // Find the correct index in the FULL list based on the source url
                  const src = feedItems[feedIdx]?.src;
                  const idx = ALL_IMAGES.findIndex(i => i.src === src);
                  if (idx >= 0) setOpenIndex(idx);
@@ -201,7 +199,6 @@ export default function GalleryPage() {
                 {/* Masonry Grid for Category */}
                 <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
                   {catImages.map((img) => {
-                    // Find global index for lightbox
                     const globalIndex = ALL_IMAGES.findIndex(x => x.src === img.src);
                     
                     return (
@@ -220,9 +217,11 @@ export default function GalleryPage() {
                             alt={img.alt} 
                             width={img.w} 
                             height={img.h} 
-                            className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105 grayscale hover:grayscale-0" 
+                            // UPDATED: Full color on mobile, grayscale -> color on desktop hover
+                            className="w-full h-auto object-cover transition-all duration-500 group-hover:scale-105 md:grayscale md:group-hover:grayscale-0" 
                             loading="lazy"
                           />
+                          
                           {/* Hover Overlay */}
                           <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                              <span className="bg-[#ea580c] text-white px-3 py-1 font-bold uppercase tracking-widest text-xs shadow-md">
@@ -250,21 +249,20 @@ export default function GalleryPage() {
           {/* === LIGHTBOX === */}
             {openIndex !== null && (
             <Lightbox
-              items={flattenImages}
-              index={openIndex!}
+              items={flattenImages as { src: string; category: string; w: number; h: number; alt: string }[]}
+              index={openIndex as number}
               onClose={() => setOpenIndex(null)}
-              onNext={() => setOpenIndex((openIndex! + 1) % flattenImages.length)}
-              onPrev={() => setOpenIndex((openIndex! - 1 + flattenImages.length) % flattenImages.length)}
-              likes={likes}
+              onNext={() => setOpenIndex(((openIndex as number) + 1) % flattenImages.length)}
+              onPrev={() => setOpenIndex(((openIndex as number) - 1 + flattenImages.length) % flattenImages.length)}
+              likes={likes as CountMap}
               onLike={(src: string) => setLike(src, 1)}
-              comments={comments}
-              onAddComment={(src: string, text: string) => addComment(src, text)}
+              comments={comments as CommentMap}
+              onAddComment={addComment as (src: string, text: string) => void}
             />
             )}
         </div>
       </section>
 
-      {/* Global Scrollbar Hide */}
       <style jsx global>{`
         html, body { overflow-y: auto; }
         *::-webkit-scrollbar { display: none; }
@@ -291,7 +289,6 @@ function VerticalSnapFeed({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Keyboard scroll support
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -308,7 +305,6 @@ function VerticalSnapFeed({
 
   return (
     <div className="mx-auto w-full max-w-2xl">
-      {/* The Scroll Container */}
       <div
         ref={containerRef}
         tabIndex={0}
@@ -329,10 +325,8 @@ function VerticalSnapFeed({
             key={`${it.src}-${i}`}
             className="snap-start h-full w-full flex items-center justify-center p-4 sm:p-8 relative"
           >
-            {/* Card Frame */}
             <div className="relative w-full max-w-[500px] bg-white p-2 shadow-2xl transform transition-transform duration-500 hover:scale-[1.01]">
               
-              {/* Header Info (Inside Frame) */}
               <div className="flex justify-between items-center px-2 pb-2 pt-1">
                  <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-[#ea580c] rounded-full"></div>
@@ -341,20 +335,15 @@ function VerticalSnapFeed({
                  <span className="text-gray-400 font-bold text-xs">2025</span>
               </div>
 
-              {/* Image Clickable Area */}
-              <button 
-                onClick={()=>onOpen(i)} 
-                className="relative w-full aspect-[4/5] overflow-hidden bg-black group"
-              >
+              <button onClick={()=>onOpen(i)} className="relative w-full aspect-[4/5] overflow-hidden bg-black group">
                 <Image
                   src={it.src}
                   alt={it.alt}
                   fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-105 grayscale group-hover:grayscale-0"
+                  // Full color always for the featured reel
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
                   priority={i < 2}
                 />
-                
-                {/* Hard overlay on hover */}
                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                    <span className="bg-[#ea580c] text-white px-4 py-2 font-bold uppercase tracking-widest shadow-[4px_4px_0px_0px_black]">
                      Open
@@ -362,7 +351,6 @@ function VerticalSnapFeed({
                 </div>
               </button>
 
-              {/* Footer Info */}
               <div className="pt-3 px-2 pb-1">
                  <p className="text-gray-600 text-sm font-medium leading-snug line-clamp-2 mb-3">
                    {it.alt}
@@ -386,7 +374,6 @@ function VerticalSnapFeed({
         ))}
       </div>
       
-      {/* Hint */}
       <div className="text-center mt-4">
          <p className="text-white/30 text-xs font-bold uppercase tracking-widest animate-pulse">
            Scroll / Swipe 
@@ -396,7 +383,7 @@ function VerticalSnapFeed({
   );
 }
 
-/* =================== LIGHTBOX (Industrial) =================== */
+/* =================== LIGHTBOX =================== */
 
 function Lightbox({ items, index, onClose, onNext, onPrev, likes, onLike, comments, onAddComment }: any) {
   const item = items[index];
@@ -411,14 +398,12 @@ function Lightbox({ items, index, onClose, onNext, onPrev, likes, onLike, commen
       >
         <div className="flex w-full max-w-6xl h-full max-h-[85vh] bg-[#111] border-2 border-white/10 shadow-2xl overflow-hidden flex-col md:flex-row" onClick={e=>e.stopPropagation()}>
           
-          {/* Image */}
           <div className="flex-1 relative bg-black flex items-center justify-center">
              <Image src={item.src} alt={item.alt} fill className="object-contain" />
              <button onClick={onPrev} className="absolute left-4 p-3 bg-white text-black font-bold hover:bg-[#ea580c] hover:text-white transition-colors shadow-[4px_4px_0px_0px_black]">←</button>
              <button onClick={onNext} className="absolute right-4 p-3 bg-white text-black font-bold hover:bg-[#ea580c] hover:text-white transition-colors shadow-[4px_4px_0px_0px_black]">→</button>
           </div>
 
-          {/* Sidebar */}
           <div className="w-full md:w-[380px] bg-white flex flex-col border-l-2 border-black">
              <div className="p-5 border-b-2 border-black/10 bg-gray-50">
                 <h2 className="text-xl font-black text-black uppercase leading-none">{item.category}</h2>
@@ -426,7 +411,6 @@ function Lightbox({ items, index, onClose, onNext, onPrev, likes, onLike, commen
                 <p className="text-gray-600 text-sm mt-3 leading-relaxed">{item.alt}</p>
              </div>
 
-             {/* Comments */}
              <div className="flex-1 overflow-y-auto p-5 space-y-3 bg-white">
                 {(comments[item.src] || []).map((c: any, i: number) => (
                    <div key={i} className="bg-gray-100 p-3 border-l-4 border-[#ea580c]">
@@ -435,7 +419,6 @@ function Lightbox({ items, index, onClose, onNext, onPrev, likes, onLike, commen
                 ))}
              </div>
 
-             {/* Action */}
              <div className="p-4 bg-gray-50 border-t-2 border-black/10">
                 <div className="flex items-center justify-between mb-3">
                    <button onClick={()=>onLike(item.src)} className="text-black font-bold text-xs uppercase flex gap-2 items-center hover:text-[#ea580c]">

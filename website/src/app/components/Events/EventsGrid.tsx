@@ -1,90 +1,24 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { format } from "date-fns";
+import { FiClock, FiMapPin, FiCalendar } from "react-icons/fi";
 import { EventItem, EventTag } from "./events.types";
-import { formatDT, googleCalLink, isUpcoming, useBodyScrollLock, resolveEventImage } from "./events.utils";
+import { isUpcoming, formatDT, googleCalLink, resolveEventImage } from "./events.utils";
 
-/** estimate current grid columns */
-function useGridColumns(containerRef: React.RefObject<HTMLDivElement | null>) {
-  const [cols, setCols] = useState(1);
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const compute = () => {
-      const first = el.querySelector("[data-event-card]") as HTMLElement | null;
-      if (!first) return setCols(1);
-      const rowWidth = el.clientWidth, cardWidth = first.clientWidth, gutter = 16;
-      setCols(Math.max(1, Math.floor((rowWidth + gutter) / (cardWidth + gutter))));
-    };
-    compute();
-    const ro = new ResizeObserver(compute);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [containerRef]);
-  return cols;
+interface EventsGridProps {
+  items: EventItem[];
+  initialVisible?: number;
+  onEventClick?: (event: EventItem) => void;
 }
 
-/** modal */
-function EventModal({ event, onClose }: { event: EventItem | null; onClose: () => void }) {
-  const closeRef = useRef<HTMLButtonElement>(null);
-  useBodyScrollLock(Boolean(event));
-  useEffect(() => {
-    if (!event) return;
-    closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [event, onClose]);
-  if (!event) return null;
-  const stop = (e: React.MouseEvent) => e.stopPropagation();
-
-  return (
-    <div className="fixed inset-0 z-[80] flex items-start md:items-center justify-center p-3 sm:p-6" role="dialog" aria-modal="true" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-      <div onClick={stop} className="relative z-[81] w-full max-w-3xl rounded-2xl border border-white/10 bg-[#0e1218] text-orange-50 shadow-2xl">
-        <div className="relative aspect-[16/9] overflow-hidden rounded-t-2xl">
-          <img src={resolveEventImage(event)} alt={event.title} className="h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-          <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
-            {event.tags.map((t) => (
-              <span key={t} className="rounded-full bg-black/60 text-[10px] uppercase tracking-wide px-2 py-1 border border-white/10">{t}</span>
-            ))}
-          </div>
-        </div>
-        <div className="p-4 sm:p-6">
-          <div className="flex items-start gap-3">
-            <h2 className="text-xl sm:text-2xl font-semibold text-orange-100">{event.title}</h2>
-            <button ref={closeRef} onClick={onClose} className="ml-auto rounded-full border border-white/15 px-3 py-1.5 text-sm text-orange-200 hover:bg-white/10">✕</button>
-          </div>
-          <div className="mt-2 text-sm text-orange-200/85">
-            <p><span className="font-medium">{formatDT(event.startISO)}</span>{event.endISO ? ` – ${formatDT(event.endISO)}` : ""}</p>
-            <p className="mt-0.5">
-              <span className="font-medium">Location:</span> {event.location}{" "}
-              {event.mapUrl && <a href={event.mapUrl} target="_blank" rel="noreferrer" className="underline underline-offset-4 hover:opacity-90">(Map)</a>}
-            </p>
-          </div>
-          <p className="mt-4 text-orange-100/90 leading-relaxed">{event.description}</p>
-          <div className="mt-6 flex flex-wrap gap-2">
-            <a href={googleCalLink(event)} target="_blank" rel="noreferrer" className="rounded-full px-4 py-2 text-xs font-semibold bg-orange-500 text-black hover:bg-orange-400">Add to Calendar</a>
-            {event.rsvpUrl && <Link href={event.rsvpUrl} className="rounded-full px-4 py-2 text-xs font-semibold border border-orange-500 text-orange-400 hover:bg-orange-500/10">RSVP</Link>}
-            {event.galleryUrl && <Link href={event.galleryUrl} className="rounded-full px-4 py-2 text-xs font-semibold border border-white/15 text-orange-200 hover:bg-white/5">Gallery</Link>}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function EventsGrid({ items, initialVisible = 6 }: { items: EventItem[]; initialVisible?: number }) {
+export default function EventsGrid({ items, initialVisible = 6, onEventClick }: EventsGridProps) {
   const [tab, setTab] = useState<"Upcoming" | "Past" | "All">("Upcoming");
   const [activeTags, setActiveTags] = useState<EventTag[]>([]);
   const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<EventItem | null>(null);
-
-  const gridRef = useRef<HTMLDivElement>(null);
-  const cols = useGridColumns(gridRef);
-  const [visible, setVisible] = useState(initialVisible);
+  const [visibleCount, setVisibleCount] = useState(initialVisible);
 
   const allTags = useMemo(() => {
     const s = new Set<EventTag>();
@@ -92,10 +26,12 @@ export default function EventsGrid({ items, initialVisible = 6 }: { items: Event
     return Array.from(s).sort();
   }, [items]);
 
-  const filtered = useMemo(() => {
+  const filteredItems = useMemo(() => {
     let list = items.slice();
+
     if (tab === "Upcoming") list = list.filter(isUpcoming);
     if (tab === "Past") list = list.filter((e) => !isUpcoming(e));
+
     if (query.trim()) {
       const q = query.toLowerCase();
       list = list.filter((e) =>
@@ -104,107 +40,194 @@ export default function EventsGrid({ items, initialVisible = 6 }: { items: Event
         e.location.toLowerCase().includes(q)
       );
     }
-    if (activeTags.length) list = list.filter((e) => activeTags.every((t) => e.tags.includes(t)));
+
+    if (activeTags.length) {
+      list = list.filter((e) => activeTags.every((t) => e.tags.includes(t)));
+    }
+
     list.sort((a, b) => {
       const da = new Date(a.startISO).getTime();
       const db = new Date(b.startISO).getTime();
       return tab === "Past" ? db - da : da - db;
     });
+
     return list;
   }, [items, tab, activeTags, query]);
 
-  useEffect(() => { setVisible(initialVisible); }, [tab, activeTags, query, initialVisible]);
+  useEffect(() => {
+    setVisibleCount(initialVisible);
+  }, [tab, activeTags, query, initialVisible]);
 
-  const visibleItems = filtered.slice(0, visible);
-  const canLoadMore = visible < filtered.length;
-  const toggleTag = (t: EventTag) => setActiveTags((prev) => prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]);
-  const stop = (e: React.MouseEvent) => e.stopPropagation();
+  const visibleItems = filteredItems.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredItems.length;
+
+  const toggleTag = (t: EventTag) => {
+    setActiveTags((prev) => prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]);
+  };
+
+  const stopPropagation = (e: React.MouseEvent) => e.stopPropagation();
 
   return (
     <>
-      {/* controls */}
-      <section className="px-4 md:px-8 py-6 md:py-8">
-        <div className="mx-auto max-w-6xl flex flex-col gap-4">
-          <div className="flex items-center gap-2">
-            {(["Upcoming", "Past", "All"] as const).map((t) => (
-              <button key={t} onClick={() => setTab(t)} className={["px-4 py-2 rounded-full text-sm font-medium border transition",
-                tab === t ? "bg-orange-500 text-black border-orange-500" : "border-white/15 text-orange-200 hover:bg-white/5"].join(" ")}>
-                {t}
-              </button>
-            ))}
-            <div className="ml-auto w-full sm:w-80">
-              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search events…"
-                className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 outline-none placeholder:text-orange-200/50 focus:border-orange-400" />
+      <section className="px-4 md:px-8 pb-12">
+        <div className="mx-auto max-w-6xl flex flex-col gap-8">
+          
+          {/* Controls Bar (Industrial Style) */}
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6 justify-between border-b-2 border-white/10 pb-8">
+            
+            {/* Tabs */}
+            <div className="flex bg-black border-2 border-white/10 p-1 rounded-lg shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)]">
+              {(["Upcoming", "Past", "All"] as const).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTab(t)}
+                  className={`px-6 py-2 rounded-md text-sm font-bold uppercase tracking-wider transition-all ${
+                    tab === t 
+                      ? "bg-[#ea580c] text-white shadow-sm" 
+                      : "text-gray-400 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+
+            {/* Search */}
+            <div className="w-full md:w-80">
+              <input 
+                value={query} 
+                onChange={(e) => setQuery(e.target.value)} 
+                placeholder="SEARCH EVENTS..."
+                className="w-full bg-[#151515] border-2 border-white/10 rounded-none px-4 py-3 text-sm font-bold text-white placeholder:text-gray-600 focus:outline-none focus:border-[#ea580c] uppercase tracking-wide transition-colors" 
+              />
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
+
+          {/* Tags Filter */}
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-xs font-black text-[#ea580c] uppercase tracking-widest mr-2 border-r-2 border-white/10 pr-4">Filter:</span>
             {allTags.map((t) => {
               const active = activeTags.includes(t);
               return (
-                <button key={t} onClick={() => toggleTag(t)} className={["px-3 py-1.5 rounded-full text-xs font-medium border transition",
-                  active ? "bg-orange-500 text-black border-orange-500" : "border-white/15 text-orange-200 hover:bg-white/5"].join(" ")}>
+                <button key={t} onClick={() => toggleTag(t)} 
+                  className={`px-3 py-1 rounded-sm text-[10px] font-bold uppercase tracking-wide border-2 transition-all ${
+                    active 
+                      ? "bg-white border-white text-black" 
+                      : "bg-transparent border-white/20 text-gray-400 hover:border-white hover:text-white"
+                  }`}
+                >
                   {t}
                 </button>
               );
             })}
             {activeTags.length > 0 && (
-              <button onClick={() => setActiveTags([])} className="px-3 py-1.5 rounded-full text-xs font-medium border border-white/15 text-orange-200/80 hover:bg-white/5">
-                Clear
+              <button onClick={() => setActiveTags([])} className="ml-auto text-[10px] font-bold text-red-500 hover:text-red-400 uppercase tracking-wider border-b border-red-500/50 hover:border-red-400 pb-0.5 transition-colors">
+                Clear All
               </button>
             )}
           </div>
         </div>
       </section>
 
-      {/* grid */}
-      <section className="px-4 md:px-8 pb-10 md:pb-16">
-        <div ref={gridRef} className="mx-auto max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          {visibleItems.map((e) => (
-            <article key={e.id} data-event-card role="button" tabIndex={0}
-              onClick={() => setSelected(e)}
-              onKeyDown={(ev) => (ev.key === "Enter" || ev.key === " ") && (ev.preventDefault(), setSelected(e))}
-              className="group cursor-pointer rounded-2xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-sm hover:border-orange-400/60 transition">
-              <div className="relative aspect-[16/9] overflow-hidden">
-                <img src={resolveEventImage(e)} alt={e.title} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" loading="lazy" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
-                <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
-                  {e.tags.map((t) => (
-                    <span key={t} className="rounded-full bg-black/60 text-[10px] uppercase tracking-wide px-2 py-1 border border-white/10">{t}</span>
-                  ))}
+      <section className="px-4 md:px-8 pb-24">
+        <div className="mx-auto max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <AnimatePresence mode="popLayout">
+            {visibleItems.map((e) => (
+              <motion.article 
+                layout key={e.id} 
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}
+                whileHover={{ y: -4 }} transition={{ duration: 0.3 }}
+                onClick={() => onEventClick && onEventClick(e)}
+                className="group cursor-pointer flex flex-col h-full bg-[#121212] border border-white/10 rounded-xl overflow-hidden hover:shadow-[8px_8px_0px_0px_#ea580c] hover:border-white/30 transition-all duration-300"
+              >
+                {/* Image Area */}
+                <div className="relative h-52 w-full overflow-hidden border-b border-white/10 bg-black">
+                  <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0" style={{ backgroundImage: `url(${resolveEventImage(e)})` }} />
+                  
+                  {/* Date Badge (Industrial) */}
+                  <div className="absolute top-4 left-4 bg-white text-black px-3 py-2 text-center shadow-[4px_4px_0px_0px_black]">
+                    <span className="block text-[10px] font-black uppercase tracking-tighter leading-none mb-0.5">{format(new Date(e.startISO), "MMM")}</span>
+                    <span className="block text-xl font-black leading-none">{format(new Date(e.startISO), "dd")}</span>
+                  </div>
                 </div>
-              </div>
-              <div className="p-4 md:p-5 flex flex-col gap-3">
-                <h3 className="text-lg md:text-xl font-semibold text-orange-100">{e.title}</h3>
-                <div className="text-sm text-orange-200/80">
-                  <p><span className="font-medium">{formatDT(e.startISO)}</span>{e.endISO ? ` – ${formatDT(e.endISO)}` : ""}</p>
-                  <p className="truncate">{e.location}</p>
+
+                {/* Content */}
+                <div className="p-6 flex flex-col flex-grow">
+                  
+                  {/* Tags */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {e.tags.slice(0, 3).map((t) => (
+                      <span key={t} className="text-[9px] font-bold uppercase tracking-widest text-white/60 bg-white/5 border border-white/10 px-2 py-1 rounded-sm">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="text-xl font-black text-white uppercase leading-tight mb-4 group-hover:text-[#ea580c] transition-colors line-clamp-2">
+                    {e.title}
+                  </h3>
+
+                  {/* Meta Info */}
+                  <div className="mt-auto space-y-3 text-xs font-bold text-gray-400 uppercase tracking-wide">
+                    <div className="flex items-center gap-3 border-t border-white/5 pt-3">
+                       <FiClock className="text-[#ea580c] w-4 h-4" />
+                       <span>{formatDT(e.startISO)}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                       <FiMapPin className="text-[#ea580c] w-4 h-4" />
+                       <span className="truncate">{e.location}</span>
+                    </div>
+                  </div>
+
+                  {/* Action Bar */}
+                  <div className="mt-6 pt-4 border-t-2 border-white/5 flex gap-3" onClick={stopPropagation}>
+                      <a 
+                        href={googleCalLink(e)} 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        className="flex items-center gap-2 text-[10px] font-bold text-gray-500 hover:text-white uppercase tracking-widest transition-colors"
+                      >
+                        <FiCalendar className="w-3 h-3" /> Add to Cal
+                      </a>
+                      
+                      {e.rsvpUrl && (
+                        <Link 
+                          href={e.rsvpUrl} 
+                          className="ml-auto text-[10px] font-black text-[#ea580c] hover:text-white uppercase tracking-widest transition-colors flex items-center gap-1"
+                        >
+                          RSVP Now →
+                        </Link>
+                      )}
+                  </div>
                 </div>
-                <p className="text-sm text-orange-100/80 line-clamp-3">{e.description}</p>
-                <div className="mt-1 flex flex-wrap gap-2" onClick={stop}>
-                  <a href={googleCalLink(e)} target="_blank" rel="noreferrer" className="rounded-full px-3 py-1.5 text-xs font-medium bg-orange-500 text-black hover:bg-orange-400">Add to Calendar</a>
-                  {e.rsvpUrl && <Link href={e.rsvpUrl} className="rounded-full px-3 py-1.5 text-xs font-medium border border-orange-500 text-orange-400 hover:bg-orange-500/10">RSVP</Link>}
-                  {e.mapUrl && <a href={e.mapUrl} target="_blank" rel="noreferrer" className="rounded-full px-3 py-1.5 text-xs font-medium border border-white/15 text-orange-200 hover:bg-white/5">Map</a>}
-                  {e.galleryUrl && <Link href={e.galleryUrl} className="rounded-full px-3 py-1.5 text-xs font-medium border border-white/15 text-orange-200 hover:bg-white/5">Gallery</Link>}
-                </div>
-              </div>
-            </article>
-          ))}
+              </motion.article>
+            ))}
+          </AnimatePresence>
         </div>
 
-        {filtered.length === 0 && <p className="mx-auto max-w-6xl mt-10 text-orange-200/70">No events match your filters yet.</p>}
+        {/* Empty State */}
+        {filteredItems.length === 0 && (
+          <div className="text-center py-24 border-2 border-dashed border-white/10 rounded-xl mx-auto max-w-2xl">
+             <p className="text-gray-500 font-bold uppercase tracking-widest text-sm">No events match your filters.</p>
+             <button onClick={() => { setQuery(""); setActiveTags([]); setTab("All"); }} className="mt-4 text-[#ea580c] text-xs font-bold underline underline-offset-4">
+               Reset All Filters
+             </button>
+          </div>
+        )}
 
-        {canLoadMore && (
-          <div className="mx-auto max-w-6xl">
-            <div className="mt-8 flex justify-center">
-              <button onClick={() => setVisible(filtered.length)} className="rounded-full px-6 py-3 bg-white/8 border border-white/15 text-orange-100 hover:bg-white/10 hover:border-orange-400/60">
-                View More
-              </button>
-            </div>
+        {/* Load More */}
+        {hasMore && (
+          <div className="mt-16 flex justify-center">
+            <button 
+              onClick={() => setVisibleCount((prev) => prev + 6)} 
+              className="group px-8 py-3 rounded-full bg-white text-black text-sm font-bold uppercase tracking-widest shadow-[4px_4px_0px_0px_#ea580c] hover:-translate-y-1 active:translate-y-0 active:shadow-[2px_2px_0px_0px_#ea580c] transition-all"
+            >
+              Load More
+            </button>
           </div>
         )}
       </section>
-
-      <EventModal event={selected} onClose={() => setSelected(null)} />
     </>
   );
 }

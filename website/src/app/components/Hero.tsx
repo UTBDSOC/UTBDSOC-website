@@ -4,120 +4,114 @@ import React, { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 
-// Updated to the new "Director" Palette
 const colors = {
-  brand: "#ea580c", // The new deep orange
-  ringDim: "stroke-[#ea580c]/30", // Dimmed orange for ring track
-  surface: "bg-[#0a0a0a]", // Deepest black
+  brand: "#ea580c",
+  ringDim: "stroke-[#ea580c]/30",
+  surface: "bg-[#0a0a0a]",
 };
 
 const Hero: React.FC = () => {
   const prefersReduced = useReducedMotion();
 
   return (
-    <div className="relative min-h-[100svh] overflow-hidden text-neutral-200 bg-black">
+    <div className="relative min-h-[100svh] w-full overflow-hidden text-neutral-200 bg-black">
       
-      {/* ===== FADED STAGE BACKGROUND (Your Original) ===== */}
+      {/* ===== BACKGROUND ===== */}
       <div className="absolute inset-0 z-0">
         <Image
           src="/desiball-stage.jpg"
           alt="UTSBDSOC Stage Background"
           fill
           priority
-          className={`
-            object-cover
-            [object-position:center_35%]
-            opacity-60
-            saturate-0
-            contrast-125
-          `}
+          className="object-cover object-center opacity-60 saturate-0 contrast-125"
         />
-        {/* Orange/Warm wash to tie it together */}
         <div className="absolute inset-0 bg-[#ea580c]/10 mix-blend-overlay pointer-events-none" />
-        
-        {/* Vertical fade to black */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/90 pointer-events-none" />
-        
-        {/* Texture overlay (Optional: keeps it consistent with other sections without ruining your look) */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/95 pointer-events-none" />
         <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} />
       </div>
 
-      {/* ===== CONTENT ===== */}
-      <div className="relative z-10 mx-auto max-w-7xl min-h-[100svh] grid grid-cols-1 md:grid-cols-2 items-center">
+      {/* ===== CONTENT GRID ===== */}
+      <div className="relative z-10 mx-auto max-w-7xl min-h-[100svh] w-full grid grid-cols-1 md:grid-cols-2 place-content-center gap-8 pb-32 md:pb-0">
         
-        {/* LEFT: HELLO + AnimatedText */}
-        <div className="flex items-center justify-center p-6 md:p-8 order-2 md:order-1">
-          <div className="w-full max-w-3xl">
-            <div className="relative inline-block">
-              <motion.h1
-                initial={{ opacity: 0, x: -40 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.7, ease: "easeOut" }}
-                // Added drop-shadow to pop against the new orange theme
-                className="font-extrabold leading-none text-7xl md:text-[8rem] lg:text-[10rem] tracking-tight shimmer-text drop-shadow-2xl"
-              >
-                HELLO
-              </motion.h1>
-            </div>
+        {/* === LEFT: HELLO TEXT === */}
+        <div className="flex flex-col justify-center px-4 order-1 items-center text-center md:items-start md:text-left">
+          
+          <div className="relative">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+              className="font-extrabold leading-none text-7xl sm:text-8xl md:text-[8rem] lg:text-[10rem] tracking-tight shimmer-text drop-shadow-2xl"
+            >
+              HELLO
+            </motion.h1>
+          </div>
 
-            <div className="mt-6 md:mt-8">
-              <AnimatedText
-                phrases={["Students", "Alumni", "Staff", "Public"]}
-                disableAnimation={prefersReduced ?? false}
-                fontSizeClasses="text-4xl md:text-6xl lg:text-7xl"
-                lineWidthClass="w-28 md:w-36 lg:w-44"
-                heightClass="h-[4.5rem] md:h-[6rem] lg:h-[7rem]"
-              />
-            </div>
+          <div className="mt-2 md:mt-6 w-full flex justify-center md:justify-start">
+            <AnimatedText
+              phrases={["Students", "Alumni", "Staff", "Public"]}
+              disableAnimation={prefersReduced ?? false}
+              fontSizeClasses="text-4xl sm:text-5xl md:text-6xl lg:text-7xl"
+              lineWidthClass="w-24 md:w-36 lg:w-44"
+              heightClass="h-[4rem] md:h-[6rem] lg:h-[7rem]"
+            />
           </div>
         </div>
 
-        {/* RIGHT: Circular Logo (Your Original Orbit) */}
-        <div className="flex items-center justify-center p-6 md:p-8 order-1 md:order-2">
+        {/* === RIGHT: LOGO === */}
+        {/* Added w-full to ensure container takes available space */}
+        <div className="flex items-center justify-center px-4 order-2 w-full">
           <div
-            className={`relative rounded-full flex items-center justify-center overflow-hidden ${colors.surface} border-4 shadow-[0_0_80px_rgba(234,88,12,0.25)]`}
-            style={{ width: "90%", maxWidth: "620px", aspectRatio: "1 / 1", borderColor: colors.brand }}
+            className={`
+              relative rounded-full flex items-center justify-center overflow-hidden 
+              ${colors.surface} border-2 md:border-4 
+              shadow-[0_0_40px_rgba(234,88,12,0.2)] md:shadow-[0_0_80px_rgba(234,88,12,0.25)]
+              
+              /* === SIZE CONTROLS === */
+              w-full
+              max-w-[340px]        /* Mobile: Matches your "fine" mobile preference */
+              md:max-w-[600px]     /* Tablet: Large */
+              lg:max-w-[720px]     /* Desktop: MASSIVE (Matches your 2nd image) */
+            `}
+            style={{ aspectRatio: "1 / 1", borderColor: colors.brand }}
           >
-            {!prefersReduced && <LogoOrbitRing />}
+            <div className="absolute inset-0 w-full h-full">
+               {!prefersReduced && <LogoOrbitRing />}
+            </div>
+            
             <Image
               src="/BDSOC-logo_transparent-2-1.png.webp"
               alt="UTSBDSOC Logo"
               width={800}
               height={800}
               priority
-              className="object-contain p-6 z-10"
+              className="object-contain p-3 md:p-6 z-10"
             />
           </div>
         </div>
       </div>
 
-      {/* Bottom CTAs */}
-      <div className="absolute left-0 right-0 bottom-8 px-4 pb-[env(safe-area-inset-bottom)] md:bottom-12 md:px-0 flex justify-center z-20">
-        <div className="w-full max-w-md flex flex-col gap-3 md:max-w-none md:w-auto md:flex-row md:gap-6">
-          
-          {/* Events Button: Updated to match the "Hard Shadow" theme but kept your shape */}
+      {/* ===== BOTTOM BUTTONS ===== */}
+      <div className="absolute left-0 right-0 bottom-0 pb-[max(2rem,env(safe-area-inset-bottom))] pt-12 px-4 flex justify-center z-30 bg-gradient-to-t from-black via-black/90 to-transparent md:bg-none pointer-events-none">
+        <div className="w-full max-w-md flex flex-row gap-3 md:max-w-none md:w-auto md:gap-6 pointer-events-auto">
           <a
             href="/events"
-            className="relative font-bold rounded-2xl bg-[#ea580c] text-white w-full py-4 text-base md:w-auto md:px-8 md:py-3.5 md:text-lg transition-transform hover:-translate-y-1 shadow-[4px_4px_0px_0px_white] active:translate-y-0 active:shadow-[2px_2px_0px_0px_white] text-center"
+            className="flex-1 md:flex-none relative font-bold rounded-2xl bg-[#ea580c] text-white py-4 text-base md:px-8 md:py-3.5 md:text-lg transition-transform hover:-translate-y-1 shadow-[3px_3px_0px_0px_white] active:translate-y-0 active:shadow-[1px_1px_0px_0px_white] text-center flex items-center justify-center"
           >
             Events
           </a>
-          
-          {/* Membership Button */}
           <a
             href="https://www.activateuts.com.au/clubs/bangladeshi-society"
-            className="relative font-bold rounded-2xl bg-black border-2 border-white text-white w-full py-4 text-base md:w-auto md:px-8 md:py-3.5 md:text-lg transition-colors hover:bg-white hover:text-black text-center"
+            className="flex-1 md:flex-none relative font-bold rounded-2xl bg-black border-2 border-white text-white py-4 text-base md:px-8 md:py-3.5 md:text-lg transition-colors hover:bg-white hover:text-black text-center flex items-center justify-center"
           >
             Membership
           </a>
         </div>
       </div>
 
-      {/* Global styles (Kept your original shimmer, just tweaked color to match) */}
       <style jsx global>{`
         .shimmer-text {
           color: transparent;
-          /* Shimmer from White to Orange-White */
           background-color: #ffffff;
           background-image: linear-gradient(90deg, #ffffff 0%, #fdba74 50%, #ffffff 100%);
           background-size: 200% 100%;
@@ -134,6 +128,8 @@ const Hero: React.FC = () => {
   );
 };
 
+// ===== HELPER COMPONENTS =====
+
 const ONE_SECOND = 1000;
 const WAIT_TIME = ONE_SECOND * 3;
 
@@ -143,8 +139,9 @@ const AnimatedText: React.FC<{
   fontSizeClasses?: string;
   lineWidthClass?: string;
   heightClass?: string;
-}> = ({ phrases, disableAnimation = false, fontSizeClasses = "text-3xl md:text-5xl lg:text-6xl", lineWidthClass = "w-24", heightClass = "h-16 md:h-20" }) => {
+}> = ({ phrases, disableAnimation = false, fontSizeClasses, lineWidthClass, heightClass }) => {
   const [active, setActive] = useState(0);
+  
   useEffect(() => {
     if (disableAnimation) return;
     const id = setInterval(() => {
@@ -155,7 +152,7 @@ const AnimatedText: React.FC<{
   }, [phrases, disableAnimation]);
 
   return (
-    <div className={["relative flex items-center", heightClass].join(" ")}>
+    <div className={["relative flex justify-center md:justify-start items-center w-full", heightClass].join(" ")}>
       {phrases.map((phrase, index) => {
         const isActive = disableAnimation ? index === 0 : active === index;
         return (
@@ -163,13 +160,19 @@ const AnimatedText: React.FC<{
             key={phrase}
             initial={false}
             animate={isActive ? "active" : "inactive"}
-            variants={{ active: { opacity: 1, y: 0, scale: 1 }, inactive: { opacity: 0, y: 16, scale: 0.98 } }}
-            transition={{ duration: 0.35, ease: "easeOut" }}
-            className={["absolute font-bold text-white", fontSizeClasses, "drop-shadow-lg tracking-tight shimmer-text"].join(" ")}
+            variants={{ 
+              active: { opacity: 1, y: 0, scale: 1, pointerEvents: "auto" }, 
+              inactive: { opacity: 0, y: 20, scale: 0.95, pointerEvents: "none" } 
+            }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className={[
+              "absolute font-bold text-white left-0 right-0 mx-auto md:mx-0 md:left-auto md:right-auto", 
+              fontSizeClasses, 
+              "drop-shadow-lg tracking-tight shimmer-text"
+            ].join(" ")}
           >
             {phrase.toUpperCase()}
-            {/* Underline bar updated to Orange */}
-            <span className={["block h-1.5 mt-3 rounded-full", lineWidthClass, "bg-[#ea580c] shadow-[2px_2px_0px_0px_white]"].join(" ")} />
+            <span className={["block h-1.5 mt-2 rounded-full mx-auto md:mx-0", lineWidthClass, "bg-[#ea580c] shadow-[2px_2px_0px_0px_white]"].join(" ")} />
           </motion.div>
         );
       })}
@@ -178,10 +181,9 @@ const AnimatedText: React.FC<{
 };
 
 const LogoOrbitRing: React.FC = () => (
-  <svg className="absolute inset-0" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden>
+  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden>
     <defs>
       <linearGradient id="ringGrad" x1="0" x2="1" y1="0" y2="1">
-        {/* Updated Gradient to New Orange */}
         <stop offset="0%" stopColor="#ea580c" />
         <stop offset="100%" stopColor="#fff" stopOpacity="0.5" />
       </linearGradient>

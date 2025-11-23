@@ -1,5 +1,7 @@
-export type EventTag =
-  | "Cultural" | "Social" | "Sports" | "Film" | "Food" | "Games" | "Music" | "Career" | "Community" | "Language";
+// src/components/Events/events.types.ts
+
+// Updated: Now accepts any string
+export type EventTag = string;
 
 export type EventItem = {
   id: string;

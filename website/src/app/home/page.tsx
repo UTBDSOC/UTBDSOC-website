@@ -24,7 +24,7 @@ export default function Home() {
       locationUrl: "https://goo.gl/maps/YOUR_MAP_LINK_HERE", 
       status: "UPCOMING",
       buttonText: "Get Tickets",
-      buttonLink: "#",
+      buttonLink: "https://www.eventbrite.com/e/the-graamys-tickets-1974523343473",
       featured: true,
     },
   ];
@@ -52,28 +52,24 @@ export default function Home() {
       <Hero />
       <AboutSection />
 
-      {/* Events Section */}
+      {/* Events Section - MATCHING PAST HIGHLIGHTS BACKGROUND */}
       <section
-        className="relative min-h-screen text-white py-24 overflow-hidden bg-[#0a0a0a]"
+        className="relative min-h-screen text-white py-24 overflow-hidden bg-[#0b0f14]"
       >
         {/* 1. NOISE TEXTURE */}
         <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} />
         
-        {/* 2. GRADIENT GLOW (The Atmosphere) */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_rgba(234,88,12,0.15),_transparent_60%)] pointer-events-none" />
-
-        {/* 3. SQUARE GRID PATTERN (The "Gradient Squares") */}
+        {/* 2. GRID PATTERN (Restored to match PastHighlights) */}
         <div 
-          className="absolute inset-0 opacity-[0.15] pointer-events-none"
+          className="absolute inset-0 opacity-[0.1] pointer-events-none"
           style={{ 
-            backgroundImage: `
-              linear-gradient(to right, #333 1px, transparent 1px),
-              linear-gradient(to bottom, #333 1px, transparent 1px)
-            `,
-            backgroundSize: '40px 40px',
-            maskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)'
+            backgroundImage: 'linear-gradient(to right, #333 1px, transparent 1px), linear-gradient(to bottom, #333 1px, transparent 1px)', 
+            backgroundSize: '40px 40px' 
           }} 
         />
+
+        {/* 3. TOP BORDER ACCENT */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-white/10" />
 
         <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
           
