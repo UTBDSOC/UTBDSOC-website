@@ -5,8 +5,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"  // <--- Hardcoded path (Removes the need for .env right now)
+  provider = "postgresql"
+  url      = env("DATABASE_URL") // <--- Hardcoded path (Removes the need for .env right now)
 }
 
 model GraamysNomination {
