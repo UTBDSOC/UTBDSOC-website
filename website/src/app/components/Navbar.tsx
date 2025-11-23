@@ -10,11 +10,12 @@ import {
   FaInstagram,
   FaFacebookF,
   FaLinkedinIn,
+  FaTrophy // Icon for the awards
 } from "react-icons/fa";
 
 /* -------------------------------- config ------------------------------- */
 const NAV_LINKS = [
-  { href: "/home", label: "Home" },
+  { href: "/", label: "Home" },
   { href: "/about-us", label: "About Us" },
   { href: "/events", label: "Events" },
   { href: "/team", label: "Team" },
@@ -38,7 +39,7 @@ export default function Navbar() {
 
   useEffect(() => setOpen(false), [pathname]);
 
-  // Scroll detection
+  // Scroll detection for Industrial Mode
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     handleScroll();
@@ -76,17 +77,17 @@ export default function Navbar() {
           </Link>
 
           {/* DESKTOP LINKS */}
-          <div className="hidden md:flex">
+          <div className="hidden lg:flex">
             <ul className="flex items-center gap-1">
               {NAV_LINKS.map(({ href, label }) => {
-                const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+                const active = pathname === href;
                 return (
                   <li key={href}>
                     <Link
                       href={href}
                       className={[
-                        "relative px-4 py-2 font-bold text-sm uppercase tracking-wide transition-all duration-200",
-                        "hover:bg-black hover:text-white rounded-md",
+                        "relative px-4 py-2 font-bold text-sm uppercase tracking-wide transition-all duration-200 rounded-md",
+                        "hover:bg-black hover:text-white",
                         active 
                           ? "bg-black text-white shadow-[2px_2px_0px_0px_white]" 
                           : "text-white"
@@ -100,10 +101,24 @@ export default function Navbar() {
             </ul>
           </div>
 
-          {/* SOCIALS & MEMBERSHIP */}
-          <div className="hidden md:flex items-center gap-4">
-            <div className="flex items-center gap-2 border-r-2 border-white/20 pr-4">
-              {SOCIALS.slice(0, 4).map(({ href, icon: Icon, label }) => (
+          {/* SOCIALS & ACTIONS */}
+          <div className="hidden lg:flex items-center gap-4">
+            
+            {/* === SPECIAL FEATURE: GRAAMY'S VOTE BUTTON === */}
+            <Link
+              href="/graamys"
+              className="relative group flex items-center gap-2 rounded-full bg-black px-4 py-2 text-xs font-black uppercase tracking-widest text-white shadow-[3px_3px_0px_0px_white] border-2 border-white hover:translate-y-px hover:shadow-[1px_1px_0px_0px_white] transition-all"
+            >
+              <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+              </span>
+              <FaTrophy className="text-[#ea580c]" />
+              Vote Now
+            </Link>
+
+            <div className="flex items-center gap-2 border-l-2 border-white/20 pl-4">
+              {SOCIALS.slice(0, 3).map(({ href, icon: Icon, label }) => (
                 <a
                   key={label}
                   href={href}
@@ -117,7 +132,7 @@ export default function Navbar() {
               ))}
             </div>
 
-            {/* Hard Shadow Button */}
+            {/* Membership Button */}
             <a
               href="https://www.activateuts.com.au/clubs/bangladeshi-society"
               target="_blank"
@@ -133,7 +148,7 @@ export default function Navbar() {
             aria-label="Open menu"
             aria-expanded={open}
             onClick={() => setOpen((s) => !s)}
-            className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-white hover:bg-black focus:outline-none"
+            className="lg:hidden inline-flex items-center justify-center rounded-md p-2 text-white hover:bg-black focus:outline-none"
           >
             <div className="space-y-1.5">
               <span
@@ -162,7 +177,7 @@ export default function Navbar() {
       {/* MOBILE DRAWER (Industrial Style) */}
       <div
         className={[
-          "md:hidden fixed inset-x-0 top-[60px] z-[9998] origin-top",
+          "lg:hidden fixed inset-x-0 top-[60px] z-[9998] origin-top",
           "bg-[#ea580c] border-b-4 border-black shadow-2xl",
           "transition-transform duration-300 ease-in-out",
           open ? "translate-y-0" : "-translate-y-[150%]",
@@ -171,9 +186,20 @@ export default function Navbar() {
         <div className="absolute inset-0 opacity-[0.15] mix-blend-multiply pointer-events-none" style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} />
         
         <div className="relative mx-auto px-6 py-8 flex flex-col gap-6">
+          
+          {/* Mobile Vote Button */}
+          <Link
+              href="/graamys"
+              onClick={() => setOpen(false)}
+              className="flex items-center justify-center gap-2 w-full text-center rounded-full bg-black py-4 text-sm font-bold uppercase tracking-widest text-white shadow-[4px_4px_0px_0px_white] active:translate-y-1 active:shadow-none transition-all border-2 border-white"
+            >
+              <FaTrophy className="text-[#ea580c]" />
+              Vote: The Graamy's
+            </Link>
+
           <ul className="space-y-2">
             {NAV_LINKS.map(({ href, label }) => {
-              const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+              const active = pathname === href;
               return (
                 <li key={href}>
                   <Link
@@ -212,7 +238,7 @@ export default function Navbar() {
             href="https://www.activateuts.com.au/clubs/bangladeshi-society"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full text-center rounded-full bg-black py-4 text-sm font-bold uppercase tracking-widest text-white shadow-[4px_4px_0px_0px_white] active:translate-y-1 active:shadow-none transition-all"
+            className="w-full text-center rounded-full bg-white text-black py-4 text-sm font-bold uppercase tracking-widest border-2 border-black shadow-[4px_4px_0px_0px_black] active:translate-y-1 active:shadow-none transition-all"
           >
             Become a Member
           </a>

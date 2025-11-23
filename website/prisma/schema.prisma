@@ -1,0 +1,25 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"  // <--- Hardcoded path (Removes the need for .env right now)
+}
+
+model GraamysNomination {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  
+  academicWeapon String?
+  dancer         String?
+  melodiousVoice String?
+  olympian       String?
+  gymshark       String?
+  fashionIcon    String?
+  bestCook       String?
+  bestEvent      String?
+  bestSociety    String?
+}
