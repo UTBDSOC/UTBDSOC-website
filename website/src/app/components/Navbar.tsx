@@ -16,9 +16,9 @@ import {
 /* -------------------------------- config ------------------------------- */
 const NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/about-us", label: "About Us" },
+  //{ href: "/about-us", label: "About Us" },
   { href: "/events", label: "Events" },
-  { href: "/team", label: "Team" },
+  // { href: "/team", label: "Team" },
   { href: "/gallery", label: "Gallery" },
 ];
 
@@ -58,15 +58,15 @@ export default function Navbar() {
     >
       {/* Noise Texture Overlay (visible only when scrolled) */}
       {scrolled && (
-        <div 
-          className="absolute inset-0 opacity-[0.15] mix-blend-multiply pointer-events-none" 
-          style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} 
+        <div
+          className="absolute inset-0 opacity-[0.15] mix-blend-multiply pointer-events-none"
+          style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }}
         />
       )}
 
       <div className="relative mx-auto max-w-7xl px-6">
         <nav className="flex h-14 items-center justify-between">
-          
+
           {/* BRAND */}
           <Link
             href="/"
@@ -88,8 +88,8 @@ export default function Navbar() {
                       className={[
                         "relative px-4 py-2 font-bold text-sm uppercase tracking-wide transition-all duration-200 rounded-md",
                         "hover:bg-black hover:text-white",
-                        active 
-                          ? "bg-black text-white shadow-[2px_2px_0px_0px_white]" 
+                        active
+                          ? "bg-black text-white shadow-[2px_2px_0px_0px_white]"
                           : "text-white"
                       ].join(" ")}
                     >
@@ -103,7 +103,7 @@ export default function Navbar() {
 
           {/* SOCIALS & ACTIONS */}
           <div className="hidden lg:flex items-center gap-4">
-            
+
             {/* === SPECIAL FEATURE: GRAAMY'S VOTE BUTTON === */}
             <Link
               href="/graamys"
@@ -184,18 +184,18 @@ export default function Navbar() {
         ].join(" ")}
       >
         <div className="absolute inset-0 opacity-[0.15] mix-blend-multiply pointer-events-none" style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} />
-        
+
         <div className="relative mx-auto px-6 py-8 flex flex-col gap-6">
-          
+
           {/* Mobile Vote Button */}
           <Link
-              href="/graamys"
-              onClick={() => setOpen(false)}
-              className="flex items-center justify-center gap-2 w-full text-center rounded-full bg-black py-4 text-sm font-bold uppercase tracking-widest text-white shadow-[4px_4px_0px_0px_white] active:translate-y-1 active:shadow-none transition-all border-2 border-white"
-            >
-              <FaTrophy className="text-[#ea580c]" />
-              Vote: The Graamy's
-            </Link>
+            href="/graamys"
+            onClick={() => setOpen(false)}
+            className="flex items-center justify-center gap-2 w-full text-center rounded-full bg-black py-4 text-sm font-bold uppercase tracking-widest text-white shadow-[4px_4px_0px_0px_white] active:translate-y-1 active:shadow-none transition-all border-2 border-white"
+          >
+            <FaTrophy className="text-[#ea580c]" />
+            Vote: The Graamy's
+          </Link>
 
           <ul className="space-y-2">
             {NAV_LINKS.map(({ href, label }) => {
